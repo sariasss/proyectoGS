@@ -12,17 +12,14 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 @EqualsAndHashCode
-public class Usuario {
+public class Entrenador {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String nombre;
-    private String email;
-    private String telefono;
+    private String especialidad;
 
-    @OneToMany(mappedBy = "usuario")
-    private List<Bono> bonos;
+    @OneToMany(mappedBy = "entrenador")
+    private List<Clase> clases;
 
-    @OneToMany(mappedBy = "usuario")
-    private List<ClaseTipo3Usuario> clasesTipo3;
 }

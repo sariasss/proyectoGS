@@ -12,17 +12,20 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 @EqualsAndHashCode
-public class Usuario {
+public class Bono {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String nombre;
-    private String email;
-    private String telefono;
 
-    @OneToMany(mappedBy = "usuario")
-    private List<Bono> bonos;
+    private int max_usos;
 
-    @OneToMany(mappedBy = "usuario")
-    private List<ClaseTipo3Usuario> clasesTipo3;
+    @Enumerated(value = EnumType.STRING)
+    private TipoBono tipo;
+
+    @ManyToOne
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
+
+    @OneToMany(mappedBy = "bono", cascade = CascadeType.ALL)
+    private List<UsoBono> usos;
 }
