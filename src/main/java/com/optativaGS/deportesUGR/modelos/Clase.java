@@ -23,7 +23,7 @@ public abstract class Clase {
 
     @ManyToOne
     @JoinColumn(name = "entrenador_id")
-    private Entrenador entrenador;
+    private Usuario entrenador;
 
     @OneToMany(mappedBy = "clase", cascade = CascadeType.ALL)
     private List<Reserva> reservas;
