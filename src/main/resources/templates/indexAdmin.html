@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Usuarios</title>
+
+    <style>
+
+        body{
+            font-family: Arial;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 70%;
+            margin: 30px auto;
+        }
+
+        th, td {
+            border: 1px solid #333;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .botones{
+            text-align:center;
+            margin:20px;
+        }
+
+        .btn{
+            padding:10px 20px;
+            text-decoration:none;
+            color:white;
+            border-radius:5px;
+        }
+
+        .alta{
+            background-color:green;
+        }
+
+        .baja{
+            background-color:red;
+        }
+
+        .clases{
+            background-color:blue;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<h2 style="text-align:center;">Listado de Usuarios</h2>
+
+<div class="botones">
+
+    <a th:href="@{/newUsuario}" class="btn alta">
+        Alta Usuario
+    </a>
+
+    <a th:href="@{/newEntrenador}" class="btn alta">
+        Alta Entrenador
+    </a>
+
+    <a th:href="@{/clases}" class="btn clases">
+        Ver Clases Tipo3
+    </a>
+</div>
+<table>
+
+    <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Email</th>
+        <th>Teléfono</th>
+        <th>Password</th>
+        <th>Rol</th>
+        <th>Especialidad</th>
+        <th>Acciones</th>
+    </tr>
+
+    <tr th:each="u : ${usuarios}">
+
+        <td th:text="${u.id}"></td>
+        <td th:text="${u.nombre}"></td>
+        <td th:text="${u.email}"></td>
+        <td th:text="${u.telefono}"></td>
+
+        <td th:text="${u.password}"></td>
+
+        <td th:text="${u.rol}"></td>
+
+        <td th:text="${u.especialidad}"></td>
+        <td>
+            <a th:href="@{/editUsuario/{id}(id=${u.id})}"
+               class="btn alta">
+                Editar
+            </a>
+
+            <a th:href="@{/delUsuario/{id}(id=${u.id})}"
+               class="btn baja">
+                Baja
+            </a>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
