@@ -19,6 +19,10 @@ public class Usuario {
     private String nombre;
     private String email;
     private String telefono;
+    private String password;
+
+    @Enumerated(value = EnumType.STRING)
+    private String rol;
 
     @OneToMany(mappedBy = "usuario")
     private List<Bono> bonos;

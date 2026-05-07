@@ -17,5 +17,4 @@ public class ClaseTipo3 extends Clase{
     @OneToMany(mappedBy = "clase")
     private List<ClaseTipo3Usuario> inscripciones;
 
-    private List<Usuario> usuarios;
 }
