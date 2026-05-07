@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>Inicio</title>
+    </head>
+    <body>
+
+        <h1>Login correcto</h1>
+
+        <p>Bienvenido:</p>
+
+        <p th:text="${usuario.nombre}"></p>
+
+        <p th:text="${usuario.email}"></p>
+
+        <p th:text="${usuario.rol}"></p>
+
+    </body>
+</html>
