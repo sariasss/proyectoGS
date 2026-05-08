@@ -33,15 +33,7 @@ public class Usuario {
     @OneToMany(mappedBy = "usuario")
     private List<ClaseTipo3Usuario> clasesTipo3;
 
-    public Usuario(Long id,
-                   String nombre,
-                   String email,
-                   String telefono,
-                   String password,
-                   RolUsuario rol,
-                   List<Bono> bonos,
-                   List<ClaseTipo3Usuario> clasesTipo3) {
-
+    public Usuario(Long id, String nombre, String email, String telefono, String password, RolUsuario rol, List<Bono> bonos, List<ClaseTipo3Usuario> clasesTipo3) {
         this.id = id;
         this.nombre = nombre;
         this.email = email;

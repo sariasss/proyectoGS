@@ -2,17 +2,16 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Usuarios</title>
+    <title>Panel de Administración</title>
 
     <style>
-
         body{
             font-family: Arial;
         }
 
         table {
             border-collapse: collapse;
-            width: 70%;
+            width: 80%;
             margin: 30px auto;
         }
 
@@ -37,6 +36,8 @@
             text-decoration:none;
             color:white;
             border-radius:5px;
+            display: inline-block;
+            margin: 5px;
         }
 
         .alta{
@@ -51,15 +52,19 @@
             background-color:blue;
         }
 
+        .crear-clase {
+            background-color: #ff9800;
+        }
+
     </style>
 </head>
 
 <body>
 
-<h2 style="text-align:center;">Listado de Usuarios</h2>
+<h2 style="text-align:center;">Panel de Administración</h2>
 
 <div class="botones">
-
+    <!-- Botones de Usuarios -->
     <a th:href="@{/newUsuario}" class="btn alta">
         Alta Usuario
     </a>
@@ -68,47 +73,46 @@
         Alta Entrenador
     </a>
 
-    <a th:href="@{/clases}" class="btn clases">
-        Ver Clases Tipo3
+    <!-- Botones de Clases -->
+    <a th:href="@{/newClaseTipo3}" class="btn crear-clase">
+        Crear Clase Tipo 3
     </a>
-</div>
-<table>
 
+    <a th:href="@{/clases}" class="btn clases">
+        Ver Clases Tipo 3
+    </a>
+
+    <a th:href="@{/logout}" class="btn baja" style="float: right;">Cerrar Sesión</a>
+</div>
+
+<table>
     <tr>
-        <th>ID</th>
         <th>Nombre</th>
         <th>Email</th>
         <th>Teléfono</th>
-        <th>Password</th>
         <th>Rol</th>
         <th>Especialidad</th>
         <th>Acciones</th>
     </tr>
 
     <tr th:each="u : ${usuarios}">
-
-        <td th:text="${u.id}"></td>
         <td th:text="${u.nombre}"></td>
         <td th:text="${u.email}"></td>
         <td th:text="${u.telefono}"></td>
-
-        <td th:text="${u.password}"></td>
-
         <td th:text="${u.rol}"></td>
-
-        <td th:text="${u.especialidad}"></td>
+        <td th:text="${u.especialidad != null ? u.especialidad : 'N/A'}"></td>
         <td>
-            <a th:href="@{/editUsuario/{id}(id=${u.id})}"
-               class="btn alta">
+            <a th:href="@{/editUsuario/{id}(id=${u.id})}" class="btn alta">
                 Editar
             </a>
 
-            <a th:href="@{/delUsuario/{id}(id=${u.id})}"
-               class="btn baja">
+            <a th:href="@{/delUsuario/{id}(id=${u.id})}" class="btn baja"
+               onclick="return confirm('¿Estás seguro de que quieres eliminar este usuario?')">
                 Baja
             </a>
         </td>
     </tr>
 </table>
+
 </body>
 </html>

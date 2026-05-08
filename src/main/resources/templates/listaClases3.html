@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h2>Listado de Clases Tipo 3</h2>
+    <div style="margin: 20px auto; width: 80%;">
+        <a th:href="@{/admin}"
+           style="padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">
+            ← Volver al Panel de Usuarios
+        </a>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Especialidad</th>
+                <th>Cupo Max</th>
+                <th>Entrenador</th>
+                <th>Inscritos</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="c : ${clases}">
+                <td th:text="${c.id}"></td>
+                <td th:text="${c.fecha}"></td>
+                <td th:text="${c.especialidad}"></td>
+                <td th:text="${c.cupoMax}"></td>
+                <td th:text="${c.entrenador != null ? c.entrenador.nombre : 'Sin asignar'}"></td>
+                <td th:text="${c.inscripciones != null} ? ${#lists.size(c.inscripciones)} : 0"></td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

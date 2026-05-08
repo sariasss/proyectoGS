@@ -1,5 +1,6 @@
 package com.optativaGS.deportesUGR.servicios;
 
+import com.optativaGS.deportesUGR.dto.UsuarioDTO;
 import com.optativaGS.deportesUGR.modelos.RolUsuario;
 import com.optativaGS.deportesUGR.modelos.Usuario;
 import com.optativaGS.deportesUGR.respositorios.UsuarioRepository;
@@ -13,19 +14,23 @@ import java.util.List;
 public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
 
-    public List<Usuario> findAll(){
-        return usuarioRepository.findAll();
+    public List<UsuarioDTO> findAll(){
+        return usuarioRepository.findAll().stream()
+                .map(this::mapToDTO)
+                .toList();
     }
 
-    public Usuario findById(Long id){
-        return usuarioRepository.findById(id).orElse(null);
+    public UsuarioDTO findById(Long id){
+        return usuarioRepository.findById(id)
+                .map(this::mapToDTO)
+                .orElse(null);
     }
 
-    public Usuario login(String email, String password){
+    public UsuarioDTO login(String email, String password){
         Usuario usuario = usuarioRepository.findByEmail(email);
 
         if(usuario != null && usuario.getPassword().equals(password)){
-            return usuario;
+            return mapToDTO(usuario);
         }
         return null;
     }
@@ -34,11 +39,49 @@ public class UsuarioService {
         usuarioRepository.deleteById(id);
     }
 
-    public void save(Usuario usuario){
-        if (usuario.getRol() != RolUsuario.ENTRENADOR) {
+    public void save(UsuarioDTO dto){
+        Usuario usuario = new Usuario();
+
+        if (dto.id() != null) {
+            usuario = usuarioRepository.findById(dto.id())
+                    .orElse(new Usuario());
+        } else {
+            usuario = new Usuario();
+        }
+
+        usuario.setNombre(dto.nombre());
+        usuario.setEmail(dto.email());
+        usuario.setTelefono(dto.telefono());
+        usuario.setRol(dto.rol());
+
+        if (dto.password() != null && !dto.password().isEmpty()) {
+            usuario.setPassword(dto.password());
+        }
+
+        if (dto.rol() == RolUsuario.ENTRENADOR) {
+            usuario.setEspecialidad(dto.especialidad());
+        } else {
             usuario.setEspecialidad(null);
         }
+
         usuarioRepository.save(usuario);
+    }
+
+    public List<Usuario> findEntrenadores() {
+        return usuarioRepository.findByRol(RolUsuario.ENTRENADOR);
+    }
+
+    //Convierte el usuario de la base de datos a DTO
+    private UsuarioDTO mapToDTO(Usuario usuario) {
+        return new UsuarioDTO(
+                usuario.getId(),
+                usuario.getNombre(),
+                usuario.getEmail(),
+                usuario.getTelefono(),
+                null,
+                usuario.getRol(),
+                usuario.getEspecialidad()
+        );
     }
 
 }

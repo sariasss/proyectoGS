@@ -1,28 +1,43 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <meta charset="UTF-8">
-    <title>Clases Tipo3</title>
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <title>Clases Tipo3</title>
+    </head>
 
-<body>
+    <body>
 
-<h2>Listado Clases Tipo3</h2>
+        <h2>Listado Clases Tipo3</h2>
 
-<table border="1">
+        <form th:action="@{/saveClaseTipo3}" th:object="${clase3}" method="post">
+            <h2>Nueva Clase Grupal (Tipo 3)</h2>
 
-    <tr>
-        <th>ID</th>
-        <th>Nombre</th>
-    </tr>
+            <label>Fecha de la Clase:</label>
+            <input type="date" th:field="*{fecha}" required />
 
-    <tr th:each="c : ${clases}">
-        <td th:text="${c.id}"></td>
-        <td th:text="${c.nombre}"></td>
-    </tr>
+            <label>Especialidad de la Clase:</label>
+            <select th:field="*{especialidad}" required>
+                <option value="">Selecciona el tipo de deporte/clase</option>
+                <option th:each="esp : ${especialidades}"
+                        th:value="${esp}"
+                        th:text="${esp}"></option>
+            </select>
 
-</table>
+            <label>Cupo Máximo de Personas:</label>
+            <input type="number" th:field="*{cupoMax}" min="1" required />
 
-</body>
+            <label>Entrenador Responsable:</label>
+            <select th:field="*{entrenador}" required>
+                <option value="">Seleccione un entrenador...</option>
+                <option th:each="e : ${entrenadores}"
+                        th:value="${e.id}"
+                        th:text="${e.nombre}"></option>
+            </select>
+
+            <button type="submit" class="btn alta">Crear Clase</button>
+            <a th:href="@{/admin}" class="btn">Cancelar</a>
+        </form>
+
+    </body>
 </html>

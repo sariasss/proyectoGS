@@ -12,42 +12,47 @@
 
 <form th:action="@{/saveUsuario}" th:object="${usuario}" method="post">
     <input type="hidden" th:field="*{id}">
+
     <label>Nombre:</label>
-    <input type="text" th:field="*{nombre}">
+    <input type="text" th:field="*{nombre}" required>
     <br><br>
 
     <label>Email:</label>
-    <input type="email" th:field="*{email}">
+    <input type="email" th:field="*{email}" required>
     <br><br>
 
-    <label>Password:</label>
-    <input type="password" th:field="*{password}">
-    <br><br>
+    <div th:if="${usuario.id == null}">
+        <label>Password:</label>
+        <input type="password" th:field="*{password}" required>
+        <br><br>
+    </div>
 
     <label>Telefono:</label>
     <input type="text" th:field="*{telefono}">
     <br><br>
 
     <label>Especialidad:</label>
-
-    <select th:field="*{especialidad}">
+    <select th:field="*{especialidad}" required>
         <option value="">-- Selecciona especialidad --</option>
-
         <option th:each="esp : ${especialidades}"
                 th:value="${esp}"
-                th:text="${esp}">
+                th:text="${esp}"
+                th:selected="${esp == usuario.especialidad}">
         </option>
     </select>
-
     <br><br>
+
     <input type="hidden" th:field="*{rol}">
-    <p>Rol: ENTRENADOR</p>
+    <p>Rol: <span th:text="${usuario.rol}"></span></p>
     <br><br>
 
-    <button type="submit">
-        Guardar
-    </button>
-
+    <div class="acciones">
+        <button type="submit">Guardar</button>
+        <a th:href="@{/admin}"
+           style="padding: 10px 20px; background-color: #666; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px;">
+            Cancelar
+        </a>
+    </div>
 </form>
 
 </body>

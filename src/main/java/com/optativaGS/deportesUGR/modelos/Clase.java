@@ -21,6 +21,9 @@ public abstract class Clase {
 
     private LocalDate fecha;
 
+    @Enumerated(EnumType.STRING)
+    private Especialidad especialidad;
+
     @ManyToOne
     @JoinColumn(name = "entrenador_id")
     private Usuario entrenador;
