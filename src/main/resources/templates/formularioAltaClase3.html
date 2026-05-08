@@ -7,10 +7,8 @@
     <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.png}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-
-    <body>
-
-        <h2>Listado Clases Tipo3</h2>
+    <body class="flex-center-container">
+    <div class="card-form">
 
         <form th:action="@{/saveClaseTipo3}" th:object="${clase3}" method="post">
             <h2>Nueva Clase Grupal (Tipo 3)</h2>
@@ -40,6 +38,6 @@
             <button type="submit" class="btn alta">Crear Clase</button>
             <a th:href="@{/admin}" class="btn">Cancelar</a>
         </form>
-
+    </div>
     </body>
 </html>
