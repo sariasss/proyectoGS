@@ -2,69 +2,17 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Panel de Administración</title>
-
-    <style>
-        body{
-            font-family: Arial;
-        }
-
-        table {
-            border-collapse: collapse;
-            width: 80%;
-            margin: 30px auto;
-        }
-
-        th, td {
-            border: 1px solid #333;
-            padding: 10px;
-            text-align: center;
-        }
-
-        th {
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        .botones{
-            text-align:center;
-            margin:20px;
-        }
-
-        .btn{
-            padding:10px 20px;
-            text-decoration:none;
-            color:white;
-            border-radius:5px;
-            display: inline-block;
-            margin: 5px;
-        }
-
-        .alta{
-            background-color:green;
-        }
-
-        .baja{
-            background-color:red;
-        }
-
-        .clases{
-            background-color:blue;
-        }
-
-        .crear-clase {
-            background-color: #ff9800;
-        }
-
-    </style>
+    <title>Usuarios</title>
+    <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 
 <body>
 
-<h2 style="text-align:center;">Panel de Administración</h2>
+<h2 style="text-align:center;">Listado de Usuarios</h2>
 
 <div class="botones">
-    <!-- Botones de Usuarios -->
+
     <a th:href="@{/newUsuario}" class="btn alta">
         Alta Usuario
     </a>
@@ -84,6 +32,9 @@
 
     <a th:href="@{/logout}" class="btn baja" style="float: right;">Cerrar Sesión</a>
 </div>
+<div class="table-container">
+    <table class="styled-table">
+
 
 <table>
     <tr>
@@ -114,5 +65,6 @@
     </tr>
 </table>
 
+</div>
 </body>
 </html>

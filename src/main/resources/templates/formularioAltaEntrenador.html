@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Nuevo Usuario</title>
+    <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-
-<body>
-
-<h2>Nuevo Usuario</h2>
+<body class="flex-center-container">
+<div class="card-form">
 
 <form th:action="@{/saveUsuario}" th:object="${usuario}" method="post">
     <input type="hidden" th:field="*{id}">
@@ -40,6 +40,7 @@
                 th:selected="${esp == usuario.especialidad}">
         </option>
     </select>
+
     <br><br>
 
     <input type="hidden" th:field="*{rol}">
@@ -47,13 +48,13 @@
     <br><br>
 
     <div class="acciones">
-        <button type="submit">Guardar</button>
+        <button type="submit" class="btn alta">Guardar</button>
         <a th:href="@{/admin}"
            style="padding: 10px 20px; background-color: #666; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px;">
             Cancelar
         </a>
     </div>
 </form>
-
+</div>
 </body>
 </html>

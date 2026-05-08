@@ -1,0 +1,176 @@
+body {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f4f4f7; /* Gris muy claro neutro */
+    color: #333;
+    margin: 0;
+    padding: 20px;
+}
+
+/* --- BOTONES PRINCIPALES (Superiores) --- */
+.botones {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.btn {
+    padding: 8px 18px;
+    text-decoration: none;
+    color: white;
+    border-radius: 4px; /* Bordes menos redondeados para más seriedad */
+    display: inline-block;
+    font-size: 0.9em;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+/* Botón general con tu color base */
+.alta {
+    background-color: #552661;
+    border: 1px solid #552661;
+}
+
+.clases {
+    background-color: #c296ce;
+    border: 1px solid #c296ce;
+}
+
+.alta:hover{
+    background-color: #4e2359;
+    border-color: #4e2359;
+}
+
+.clases:hover {
+    background-color: #a372af;
+    border-color: #a372af;
+}
+
+/* --- TABLA (Más ancha y robusta) --- */
+.table-container {
+    margin: 0 auto;
+    width: 95%;          /* Ocupa casi toda la pantalla */
+    max-width: 1300px;    /* Límite para pantallas ultra-anchas */
+    background-color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.styled-table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.styled-table thead tr {
+    background-color: #36183e; /* Tu color base serio */
+    color: #ffffff;
+    text-align: left;
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 14px 18px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* --- FILAS (Cebra sutil) --- */
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: #f9f9fb;
+}
+
+.styled-table tbody tr:hover {
+    background-color: #f1edf2; /* Un toque de lila muy suave al pasar el ratón */
+}
+
+/* --- COLUMNA DE ACCIONES (Botones seguidos) --- */
+.acciones-cell {
+    display: flex;
+    gap: 8px;           /* Espacio mínimo entre botones */
+    justify-content: center;
+}
+
+.btn-sm {
+    padding: 5px 12px;
+    font-size: 0.85em;
+}
+
+/* Botón Baja (Rojo oscuro/marrón muy serio, nada chillón) */
+.baja {
+    background-color: #871313;
+}
+
+.baja:hover {
+    background-color: #802b2b;
+}
+
+.flex-center-container {
+    background-color: #f4f4f7;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.card-form {
+    background: white;
+    width: 100%;
+    max-width: 450px;
+    padding: 40px;
+    border-radius: 4px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border-top: 5px solid #36183e;
+    box-sizing: border-box;
+}
+
+input{
+    border-radius: 5px;
+    padding: 5px;
+}
+
+/* --- ELEMENTOS DEL FORMULARIO --- */
+.card-form h2 {
+    color: #36183e;
+    text-align: center;
+}
+
+/* Estilo para las etiquetas */
+.card-form label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #555;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Inputs, Selects y Textareas */
+.form-control {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px; /* El espaciado se controla aquí directamente */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #36183e;
+    background-color: #fdfbff;
+    box-shadow: 0 0 0 3px rgba(54, 24, 62, 0.1);
+}
+
+
+.btn-block:hover {
+    background-color: #4e2359;
+}
+
+.logo-header{
+    width: 400px;
+    margin: 0 auto;
+    align-content: center;
+}

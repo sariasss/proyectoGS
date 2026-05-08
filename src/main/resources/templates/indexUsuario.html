@@ -3,9 +3,10 @@
     <head>
         <meta charset="UTF-8">
         <title>Inicio</title>
+        <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.png}">
+        <link rel="stylesheet" th:href="@{/css/style.css}">
     </head>
     <body>
-
         <h1>Login correcto</h1>
 
         <p>Bienvenido:</p>
@@ -15,6 +16,5 @@
         <p th:text="${usuario.email}"></p>
 
         <p th:text="${usuario.rol}"></p>
-
     </body>
 </html>

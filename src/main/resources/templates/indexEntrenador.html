@@ -1,20 +1,22 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>entrenador</title>
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8">
+        <title>entrenador</title>
+        <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.png}">
+        <link rel="stylesheet" th:href="@{/css/style.css}">
+    </head>
+    <body>
 
-<h1>Login correcto</h1>
+        <h1>Login correcto</h1>
 
-<p>Bienvenido:</p>
+        <p>Bienvenido:</p>
 
-<p th:text="${usuario.nombre}"></p>
+        <p th:text="${usuario.nombre}"></p>
 
-<p th:text="${usuario.email}"></p>
+        <p th:text="${usuario.email}"></p>
 
-<p th:text="${usuario.rol}"></p>
+        <p th:text="${usuario.rol}"></p>
 
-</body>
+    </body>
 </html>
