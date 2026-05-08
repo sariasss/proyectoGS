@@ -17,11 +17,13 @@ public class UsuarioController {
     private final UsuarioService usuarioService;
     private final ClaseService claseService;
 
+    //Página de login
     @GetMapping("")
     public String mostrarLogin(){
         return "login";
     }
 
+    //Recoge los datos del login y devuelve una página según quién ha iniciado sesión
     @PostMapping("/login")
     public String procesarLogin(@RequestParam String email, @RequestParam String password, Model model){
         Usuario usuario = usuarioService.login(email, password);
@@ -39,17 +41,20 @@ public class UsuarioController {
         return "login";
     }
 
+    //Devuelve una tabla con todos los usuarios para el admin
     @GetMapping("/admin")
     public String list(Model model){
         model.addAttribute("usuarios", usuarioService.findAll());
         return "indexAdmin";
     }
 
+    //Página de logout
     @GetMapping("/logout")
     public String logout() {
         return "redirect:/login";
     }
 
+    //Formulario para crear un nuevo usuario (solo para admin)
     @GetMapping("/newUsuario")
     public String newUserForm(Model model){
 
@@ -61,6 +66,7 @@ public class UsuarioController {
         return "formularioAltaUsuario";
     }
 
+    //Formulario para crear un nuevo entrenador (solo para admin)
     @GetMapping("/newEntrenador")
     public String newEntrenadorForm(Model model){
 
@@ -73,12 +79,14 @@ public class UsuarioController {
         return "formularioAltaEntrenador";
     }
 
+    //Recoge la información del save usuario y la guarda en la base de datos
     @PostMapping("/saveUsuario")
     public String newUser(@ModelAttribute Usuario usuario){
         usuarioService.save(usuario);
         return "redirect:/admin";
     }
 
+    //Formulario para editar un usuario dependiendo de su rol (solo para admin)
     @GetMapping("/editUsuario/{id}")
     public String editarUsuario(@PathVariable Long id, Model model){
         Usuario usuario = usuarioService.findById(id);
@@ -91,19 +99,21 @@ public class UsuarioController {
         return "formularioAltaUsuario";
     }
 
-
+    //Recoge la información del save clase tipo 3 y la guarda en la base de datos
     @PostMapping("/newClaseTipo3")
     public String newClass3(@ModelAttribute ClaseTipo3 claseTipo3){
         claseService.save(claseTipo3);
         return "formularioAltaClase3";
     }
 
+    //Elimina un usuario
     @GetMapping("/delUsuario/{id}")
     public String eliminarUsuario(@PathVariable Long id){
         usuarioService.delete(id);
         return "redirect:/admin";
     }
 
+    //Devuelve una lista de clases
     @GetMapping("/clases")
     public String listarClases(Model model){
         model.addAttribute("clases", claseService.findAll());
