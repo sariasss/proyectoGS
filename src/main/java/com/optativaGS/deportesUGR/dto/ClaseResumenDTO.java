@@ -1,8 +1,15 @@
 package com.optativaGS.deportesUGR.dto;
 
+import com.optativaGS.deportesUGR.modelos.Especialidad;
+
+import java.time.LocalDateTime;
+
+
 public record ClaseResumenDTO(
         Long id,
-        java.time.LocalDate fecha,
+        LocalDateTime fecha,
         String nombreEntrenador,
-        String tipoClase
+        Especialidad especialidad,
+        String tipoClase,
+        Integer duracionEnMinutos
 ) {}

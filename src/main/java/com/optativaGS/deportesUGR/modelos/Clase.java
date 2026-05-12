@@ -3,7 +3,7 @@ package com.optativaGS.deportesUGR.modelos;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -19,7 +19,7 @@ public abstract class Clase {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDate fecha;
+    private LocalDateTime fecha;
 
     @Enumerated(EnumType.STRING)
     private Especialidad especialidad;
@@ -30,5 +30,7 @@ public abstract class Clase {
 
     @OneToMany(mappedBy = "clase", cascade = CascadeType.ALL)
     private List<Reserva> reservas;
+
+    private Integer duracionMinutos;
 
 }
