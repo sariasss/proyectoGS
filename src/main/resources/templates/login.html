@@ -1,28 +1,85 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <meta charset="UTF-8">
-        <title>Acceso | Gestión</title>
-        <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.png}">
-        <link rel="stylesheet" th:href="@{/css/style.css}">
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso | Gestión</title>
+    <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
 
-    <body class="flex-center-container">
-        <img th:src="@{/images/logosNombre.png}" class="logo-header">
+<body class="login-page">
+<!-- Fondo decorativo -->
+<div class="login-background">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+</div>
 
-        <div class="card-form">
+<!-- Contenedor principal -->
+<main class="login-wrapper">
+
+    <!-- Panel lateral / Landing -->
+    <section class="login-hero">
+        <div class="hero-content">
+            <img th:src="@{/images/logosNombre.png}" alt="Logo" class="hero-logo">
+
+            <h1>Bienvenido al sistema de gestión</h1>
+
+            <p>
+                Administra usuarios, clases y procesos de forma rápida,
+                intuitiva y segura.
+            </p>
+
+            <ul class="hero-features">
+                <li>Gestión centralizada</li>
+                <li>Interfaz moderna y elegante</li>
+                <li>Acceso seguro</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Tarjeta de Login -->
+    <section class="login-card">
+        <div class="card-form login-form-card">
+            <div class="login-badge">Acceso Privado</div>
+
             <h2>Iniciar Sesión</h2>
+            <p class="login-subtitle">
+                Introduce tus credenciales para continuar.
+            </p>
+
             <form action="/login" method="post">
 
                 <label for="email">Email</label>
-                <input type="email" id="email" name="email" class="form-control" required>
-
+                <div class="input-wrapper">
+                    <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            class="form-control"
+                            placeholder="usuario@correo.com"
+                            required>
+                </div>
+                <br>
                 <label for="pass">Contraseña</label>
-                <input type="password" id="pass" name="password" class="form-control" required>
+                <div class="input-wrapper">
+                    <input
+                            type="password"
+                            id="pass"
+                            name="password"
+                            class="form-control"
+                            placeholder="••••••••"
+                            required>
+                </div>
+                <br>
 
-                <button type="submit" class="btn alta">Entrar</button>
-
+                <button type="submit" class="btn alta btn-login">
+                    Entrar al sistema
+                </button>
             </form>
         </div>
-    </body>
+    </section>
+</main>
+</body>
 </html>
