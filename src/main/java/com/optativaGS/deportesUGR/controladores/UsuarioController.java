@@ -34,9 +34,9 @@ public class UsuarioController {
             model.addAttribute("usuario", usuario);
 
             return switch (usuario.rol()) {
-                case USUARIO -> "indexUsuario";
+                case USUARIO -> "redirect:/indexUsuario";
                 case ADMIN -> "redirect:/admin";
-                case ENTRENADOR -> "indexEntrenador";
+                case ENTRENADOR -> "redirect:/clasesEntrenador/" + usuario.id();
             };
         }
         model.addAttribute("error", "Email o contraseña incorrectos");
@@ -94,7 +94,10 @@ public class UsuarioController {
                 usuario.getRol(),
                 usuario.getEspecialidad()
         );
-        usuarioService.save(dto);
+        Usuario usuarioGuardado= usuarioService.save(dto);
+        if(usuarioGuardado.getRol()== RolUsuario.ENTRENADOR){
+            claseService.generarCalendarioAnual(usuarioGuardado);
+        }
         return "redirect:/admin";
     }
 
@@ -139,5 +142,20 @@ public class UsuarioController {
     public String listarClases3(Model model){
         model.addAttribute("clases", claseService.findAll());
         return "listaClases3";
+    }
+
+    //Muestra la pantalla del entrenador
+    @GetMapping("/clasesEntrenador/{id}")
+    public String mostrarPanelEntrenador(@PathVariable Long id, Model model) {
+        UsuarioDTO entrenador = usuarioService.findById(id);
+
+        if (entrenador == null || entrenador.rol() != RolUsuario.ENTRENADOR) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("entrenador", entrenador);
+        model.addAttribute("clases", claseService.findByEntrenadorId(id));
+
+        return "indexEntrenador";
     }
 }

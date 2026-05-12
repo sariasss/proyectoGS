@@ -39,7 +39,7 @@ public class UsuarioService {
         usuarioRepository.deleteById(id);
     }
 
-    public void save(UsuarioDTO dto){
+    public Usuario save(UsuarioDTO dto){
         Usuario usuario = new Usuario();
 
         if (dto.id() != null) {
@@ -65,6 +65,7 @@ public class UsuarioService {
         }
 
         usuarioRepository.save(usuario);
+        return usuario;
     }
 
     public List<Usuario> findEntrenadores() {

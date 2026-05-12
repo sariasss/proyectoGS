@@ -1,22 +1,133 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <meta charset="UTF-8">
-        <title>entrenador</title>
-        <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.png}">
-        <link rel="stylesheet" th:href="@{/css/style.css}">
-    </head>
-    <body>
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Entrenador - DeportesUGR</title>
+    <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333; margin: 0; }
 
-        <h1>Login correcto</h1>
+        .header {
+            background-color: #2c3e50; color: white; padding: 1rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
 
-        <p>Bienvenido:</p>
+        .header h2 { margin: 0; font-size: 1.5rem; }
 
-        <p th:text="${usuario.nombre}"></p>
+        .user-info { display: flex; align-items: center; gap: 15px; }
+        .especialidad-tag { background: #3498db; padding: 4px 10px; border-radius: 15px; font-size: 0.8rem; }
 
-        <p th:text="${usuario.email}"></p>
+        .btn-logout {
+            background-color: #e74c3c; color: white; text-decoration: none;
+            padding: 8px 15px; border-radius: 5px; font-weight: bold; transition: 0.3s;
+        }
+        .btn-logout:hover { background-color: #c0392b; }
 
-        <p th:text="${usuario.rol}"></p>
+        .container { max-width: 1100px; margin: 30px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
 
-    </body>
+        h3 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; overflow: hidden; border-radius: 8px; }
+
+        th { background-color: #34495e; color: white; padding: 15px; text-align: left; text-transform: uppercase; font-size: 0.85rem; }
+
+        td { padding: 15px; border-bottom: 1px solid #eee; font-size: 0.95rem; }
+
+        tr:hover { background-color: #f9f9f9; }
+
+        .badge { padding: 5px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; display: inline-block; }
+        .tipo1 { background-color: #d1ecf1; color: #0c5460; }
+        .tipo3 { background-color: #d4edda; color: #155724; }
+        .badge-partido { background-color: #fcf3cf; color: #9a7d0a; border: 1px solid #f7dc6f; margin-top: 5px; }
+
+        .time-box { color: #2c3e50; font-weight: 600; }
+        .duration-text { font-size: 0.8rem; color: #7f8c8d; display: block; margin-top: 3px; }
+
+        .day-text { text-transform: capitalize; font-weight: bold; color: #2980b9; }
+
+        .no-clases { padding: 40px; text-align: center; color: #7f8c8d; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h2>DeportesUGR | Panel Entrenador</h2>
+    <div class="user-info">
+        <span>Bienvenido, <strong th:text="${entrenador.nombre}">Nombre</strong></span>
+        <span class="especialidad-tag" th:text="${entrenador.especialidad}">Especialidad</span>
+        <a th:href="@{/}" class="btn-logout">Cerrar Sesión</a>
+    </div>
+</div>
+
+<div class="container">
+    <h3>Mis Clases Asignadas</h3>
+
+    <table th:if="${!#lists.isEmpty(clases)}">
+        <thead>
+        <tr>
+            <th>Día y Fecha</th>
+            <th>Horario</th>
+            <th>Especialidad</th>
+            <th>Modalidad / Evento</th>
+            <th>Cupo</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="c : ${clases}">
+            <!-- Día de la semana y fecha -->
+            <td>
+                <span class="day-text" th:text="${#temporals.format(c.fecha, 'EEEE')}">Lunes</span><br/>
+                <small th:text="${#temporals.format(c.fecha, 'dd/MM/yyyy')}">01/01/2026</small>
+            </td>
+
+            <!-- Horario calculado: Inicio - Fin (sumando la duración) -->
+            <td>
+                <span class="time-box">
+                    <span th:text="${#temporals.format(c.fecha, 'HH:mm')}">17:00</span> -
+                    <span th:text="${#temporals.format(c.fecha.plusMinutes(c.duracionMinutos), 'HH:mm')}">18:00</span>
+                </span>
+                <span class="duration-text">
+                    <i th:text="${c.duracionMinutos} + ' min de sesión'">60 min</i>
+                </span>
+            </td>
+
+            <td style="font-weight: bold; color: #34495e;" th:text="${c.especialidad}">Fútbol</td>
+
+            <td>
+                <!-- Tipo de Clase -->
+                <span th:if="${c instanceof T(com.optativaGS.deportesUGR.modelos.ClaseTipo1)}" class="badge tipo1">
+                    📅 Entrenamiento Fijo
+                </span>
+                <span th:if="${c instanceof T(com.optativaGS.deportesUGR.modelos.ClaseTipo3)}" class="badge tipo3">
+                    📌 Clase Puntual
+                </span>
+
+                <!-- Etiqueta extra si es un partido (detectado por la duración de 120 min) -->
+                <div th:if="${c.duracionMinutos == 120}">
+                    <span class="badge badge-partido">🏆 PARTIDO MENSUAL</span>
+                </div>
+            </td>
+
+            <td>
+                <div th:if="${c instanceof T(com.optativaGS.deportesUGR.modelos.ClaseTipo3)}">
+                    <span class="inscritos-count" th:text="${#lists.size(c.inscripciones)}">0</span>
+                    / <span th:text="${c.cupoMax}">20</span>
+                </div>
+                <div th:unless="${c instanceof T(com.optativaGS.deportesUGR.modelos.ClaseTipo3)}">
+                    <span style="color: #bdc3c7; font-size: 0.8rem;">Sin cupo fijo</span>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div th:if="${#lists.isEmpty(clases)}" class="no-clases">
+        <img src="https://cdn-icons-png.flaticon.com/512/4076/4076402.png" width="80" style="opacity: 0.3; margin-bottom: 15px;">
+        <p>Actualmente no tienes clases asignadas para el año 2026.</p>
+    </div>
+</div>
+
+</body>
 </html>
