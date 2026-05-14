@@ -1,24 +1,25 @@
 package com.optativaGS.deportesUGR.servicios;
 
-import com.optativaGS.deportesUGR.modelos.Clase;
-import com.optativaGS.deportesUGR.modelos.ClaseTipo1;
-import com.optativaGS.deportesUGR.modelos.Especialidad;
-import com.optativaGS.deportesUGR.modelos.Usuario;
+import com.optativaGS.deportesUGR.modelos.*;
 import com.optativaGS.deportesUGR.respositorios.ClaseRepository;
+import com.optativaGS.deportesUGR.respositorios.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class ClaseService {
     private final ClaseRepository claseRepository;
+    private final UsuarioRepository usuarioRepository;
 
     public List<Clase> findAll(){
         return claseRepository.findAll();
@@ -38,6 +39,46 @@ public class ClaseService {
 
     public List<Clase> findByEntrenadorId(Long id) {
         return claseRepository.findByEntrenadorId(id);
+    }
+
+    public Clase create(Map<String, Object> body) {
+        String tipo = (String) body.get("tipoClase");
+        Clase clase;
+
+        switch (tipo) {
+
+            case "TIPO1" -> {
+                ClaseTipo1 c = new ClaseTipo1();
+                c.setDiaSemana((String) body.get("diaSemana"));
+                c.setHora(LocalTime.parse((String) body.get("hora")));
+                clase = c;
+            }
+            case "TIPO2" -> {
+                clase = new ClaseTipo2();
+            }
+            case "TIPO3" -> {
+                ClaseTipo3 c = new ClaseTipo3();
+                c.setCupoMax(Integer.parseInt(body.get("cupoMax").toString()));
+                clase = c;
+            }
+            default -> throw new IllegalArgumentException("Tipo de clase inválido");
+        }
+
+        clase.setFecha(LocalDateTime.parse((String) body.get("fecha")));
+        clase.setDuracionMinutos((Integer) body.get("duracionMinutos"));
+        clase.setEspecialidad(Especialidad.valueOf((String) body.get("especialidad")));
+
+        Long entrenadorId = body.get("entrenadorId") != null
+                ? Long.valueOf(body.get("entrenadorId").toString())
+                : null;
+
+        if (entrenadorId != null) {
+            Usuario entrenador = usuarioRepository.findById(entrenadorId)
+                    .orElseThrow();
+            clase.setEntrenador(entrenador);
+        }
+
+        return claseRepository.save(clase);
     }
 
     @Transactional
@@ -112,5 +153,12 @@ public class ClaseService {
             case TENIS, BADMINTON -> 45;
             default -> 60;
         };
+    }
+
+    public List<ClaseTipo3> findAllTipo3() {
+        List<ClaseTipo3> lista = claseRepository.findAllTipo3();
+        // Debug opcional: imprime las clases para ver si alguna es Tipo1
+        // lista.forEach(c -> System.out.println(c.getClass().getSimpleName()));
+        return lista;
     }
 }

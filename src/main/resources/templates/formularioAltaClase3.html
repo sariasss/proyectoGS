@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <meta charset="UTF-8">
-    <title>Clases Tipo3</title>
-    <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.png}">
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <title>Clases Tipo3</title>
+        <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.png}">
+        <link rel="stylesheet" th:href="@{/css/style.css}">
+    </head>
     <body class="flex-center-container">
         <div class="card-form">
 
@@ -14,7 +14,7 @@
                 <h2>Nueva Clase Grupal (Tipo 3)</h2>
 
                 <label>Fecha de la Clase:</label>
-                <input type="date" th:field="*{fecha}" required />
+                <input type="datetime-local" th:field="*{fecha}" required />
                 <br><br>
 
                 <label>Especialidad de la Clase:</label>

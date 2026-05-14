@@ -1,6 +1,7 @@
 package com.optativaGS.deportesUGR.respositorios;
 
 import com.optativaGS.deportesUGR.modelos.Clase;
+import com.optativaGS.deportesUGR.modelos.ClaseTipo3;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -12,4 +13,7 @@ public interface ClaseRepository extends JpaRepository<Clase, Long> {
 
     @Query("SELECT c FROM Clase c WHERE c.entrenador.id = :id AND c.fecha >= CURRENT_TIMESTAMP ORDER BY c.fecha ASC")
     List<Clase> findProximasByEntrenadorId(Long id);
+
+    @Query("SELECT c FROM ClaseTipo3 c")
+    List<ClaseTipo3> findAllTipo3();
 }

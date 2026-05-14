@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <meta charset="UTF-8">
-    <title>Nuevo Usuario</title>
-    <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.png}">
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <title>Nuevo Usuario</title>
+        <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.png}">
+        <link rel="stylesheet" th:href="@{/css/style.css}">
+    </head>
     <body class="flex-center-container">
         <div class="card-form">
             <form th:action="@{/saveUsuario}" th:object="${usuario}" method="post">

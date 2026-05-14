@@ -24,7 +24,8 @@
             </tr>
         </thead>
         <tbody>
-            <tr th:each="c : ${clases}">
+        <tr th:each="c : ${clases}"
+            th:if="${c instanceof T(com.optativaGS.deportesUGR.modelos.ClaseTipo3)}">
                 <td th:text="${c.id}"></td>
                 <td th:text="${c.fecha}"></td>
                 <td th:text="${c.especialidad}"></td>
