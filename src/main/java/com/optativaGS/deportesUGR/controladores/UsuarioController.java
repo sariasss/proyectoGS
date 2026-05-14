@@ -84,6 +84,13 @@ public class UsuarioController {
         return "formularioAltaEntrenador";
     }
 
+    //Elimina un usuario
+    @GetMapping("/delUsuario/{id}")
+    public String eliminarUsuario(@PathVariable Long id){
+        usuarioService.delete(id);
+        return "redirect:/admin";
+    }
+
     //Recoge la información del save usuario y la guarda en la base de datos
     @PostMapping("/saveUsuario")
     public String newUser(@ModelAttribute Usuario usuario){
@@ -114,57 +121,6 @@ public class UsuarioController {
             return "formularioAltaEntrenador";
         }
         return "formularioAltaUsuario";
-    }
-
-    //Formulario para crear una nueva clase de tipo 3 (solo para admin)
-    @GetMapping("/newClaseTipo3")
-    public String nuevaClaseTipo3Form(Model model) {
-        model.addAttribute("clase3", new ClaseTipo3());
-        model.addAttribute("entrenadores", usuarioService.findEntrenadores());
-        model.addAttribute("especialidades", Especialidad.values());
-        return "formularioAltaClase3";
-    }
-
-    //Recoge la información del save clase tipo 3 y la guarda en la base de datos
-    @PostMapping("/saveClaseTipo3")
-    public String newClass3(@ModelAttribute("clase3") ClaseTipo3 claseTipo3){
-        claseService.save(claseTipo3);
-        return "redirect:/admin";
-    }
-
-    //Formulario para editar las clases de tipo 3
-    @GetMapping("/editClaseTipo3/{id}")
-    public String editClaseTipo3Form(@PathVariable Long id, Model model) {
-        Clase clase = claseService.findById(id);
-
-        if (clase instanceof ClaseTipo3) {
-            model.addAttribute("clase3", clase);
-            model.addAttribute("entrenadores", usuarioService.findEntrenadores());
-            model.addAttribute("especialidades", Especialidad.values());
-            return "formularioAltaClase3";
-        }
-        return "redirect:/clases3";
-    }
-
-    //Eliminar clases del tipo 3
-    @GetMapping("/delClaseTipo3/{id}")
-    public String eliminarClaseTipo3(@PathVariable Long id) {
-        claseService.delete(id);
-        return "redirect:/clases3";
-    }
-
-    //Elimina un usuario
-    @GetMapping("/delUsuario/{id}")
-    public String eliminarUsuario(@PathVariable Long id){
-        usuarioService.delete(id);
-        return "redirect:/admin";
-    }
-
-    //Devuelve una lista de clases
-    @GetMapping("/clases")
-    public String listarClases3(Model model){
-        model.addAttribute("clases", claseService.findAll());
-        return "listaClases3";
     }
 
     //Muestra la pantalla del entrenador
@@ -258,49 +214,6 @@ public class UsuarioController {
         return "indexUsuario";
     }
 
-    @PostMapping("/comprarBono/{id}")
-    public String comprarBono(@PathVariable Long id, @RequestParam TipoBono tipo) {
-        usuarioService.comprarBono(id, tipo);
-
-        return "redirect:/indexUsuario/" + id;
-    }
-
-    //Pantalla intermedia para elegir especialidad del bono
-    @GetMapping("/elegirEspecialidad/{usuarioId}/{tipo}")
-    public String elegirEspecialidad(@PathVariable Long usuarioId, @PathVariable TipoBono tipo, Model model) {
-        model.addAttribute("usuarioId", usuarioId);
-        model.addAttribute("tipoBono", tipo);
-        model.addAttribute("especialidades", Especialidad.values());
-        return "elegirEspecialidad";
-    }
-
-    //Confirmar la compra del bono
-    @PostMapping("/confirmarCompraBono")
-    public String confirmarCompraBono(
-            @RequestParam Long usuarioId,
-            @RequestParam TipoBono tipo,
-            @RequestParam Especialidad especialidad) {
-
-        usuarioService.comprarBonoConEspecialidad(usuarioId, tipo, especialidad);
-
-        return "redirect:/indexUsuario/" + usuarioId;
-    }
-
-    //Cancelar uso del bono
-    @PostMapping("/uso/cancelar/{id}")
-    public String cancelarUso(@PathVariable Long id, @RequestParam Long usuarioId) {
-        usuarioService.cancelarYReasignar(id);
-        return "redirect:/indexUsuario/" + usuarioId;
-    }
-
-    //Solicitar cambio de clase tipo 2
-    @PostMapping("/uso/solicitar-cambio/{id}")
-    public String solicitarCambio(@PathVariable Long id, @RequestParam Long usuarioId, @RequestParam String nuevaFecha) {
-        LocalDate fecha = LocalDate.parse(nuevaFecha);
-        usuarioService.solicitarCambio(id, fecha);
-        return "redirect:/indexUsuario/" + usuarioId;
-    }
-
     @PostMapping("/clase/inscribir-especial/{claseId}")
     public String inscribirEspecial(@PathVariable Long claseId, @RequestParam Long usuarioId) {
         try {
@@ -308,19 +221,5 @@ public class UsuarioController {
         } catch (Exception e) {
         }
         return "redirect:/indexUsuario/" + usuarioId;
-    }
-
-    //Aceptar la solicitud del usuario
-    @PostMapping("/solicitud/aceptar/{id}")
-    public String aceptarSolicitud(@PathVariable Long id, @RequestParam Long entrenadorId) {
-        claseService.aceptarCambioFecha(id);
-        return "redirect:/clasesEntrenador/" + entrenadorId;
-    }
-
-    //Rechazar la solicitud del usuario
-    @PostMapping("/solicitud/rechazar/{id}")
-    public String rechazarSolicitud(@PathVariable Long id, @RequestParam Long entrenadorId) {
-        claseService.rechazarCambioFecha(id);
-        return "redirect:/clasesEntrenador/" + entrenadorId;
     }
 }

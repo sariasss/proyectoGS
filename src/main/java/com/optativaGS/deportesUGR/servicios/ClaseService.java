@@ -161,8 +161,6 @@ public class ClaseService {
 
     public List<ClaseTipo3> findAllTipo3() {
         List<ClaseTipo3> lista = claseRepository.findAllTipo3();
-        // Debug opcional: imprime las clases para ver si alguna es Tipo1
-        // lista.forEach(c -> System.out.println(c.getClass().getSimpleName()));
         return lista;
     }
 
@@ -177,32 +175,6 @@ public class ClaseService {
         if ((mes == 3 && dia >= 29) || (mes == 4 && dia <= 5)) return false;
 
         return true;
-    }
-
-    public void aceptarCambioFecha(Long usoId) {
-        UsoBono uso = usoBonoRepository.findById(usoId)
-                .orElseThrow(() -> new RuntimeException("Uso de bono no encontrado"));
-
-        if (uso.getFechaPropuesta() != null) {
-            // La fecha oficial de la clase ahora es la propuesta por el usuario
-            uso.setFecha(uso.getFechaPropuesta());
-            // Limpiamos la propuesta y marcamos como aceptada
-            uso.setFechaPropuesta(null);
-            uso.setEstadoSolicitud(EstadoSolicitud.ACEPTADA);
-
-            usoBonoRepository.save(uso);
-        }
-    }
-
-    public void rechazarCambioFecha(Long usoId) {
-        UsoBono uso = usoBonoRepository.findById(usoId)
-                .orElseThrow(() -> new RuntimeException("Uso de bono no encontrado"));
-
-        // Eliminamos la propuesta sin cambiar la fecha original
-        uso.setFechaPropuesta(null);
-        uso.setEstadoSolicitud(EstadoSolicitud.RECHAZADA);
-
-        usoBonoRepository.save(uso);
     }
 
     public List<UsoBono> findSolicitudesPendientes() {
