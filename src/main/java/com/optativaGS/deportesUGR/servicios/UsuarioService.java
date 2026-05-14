@@ -8,8 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -132,20 +134,30 @@ public class UsuarioService {
     public void comprarBonoConEspecialidad(Long usuarioId, TipoBono tipo, Especialidad especialidad) {
         Usuario u = usuarioRepository.findById(usuarioId).orElse(null);
         if (u != null) {
+            List<LocalDate> fechasOcupadas = u.getBonos().stream()
+                    .filter(b -> b.getEspecialidad().equals(especialidad))
+                    .flatMap(b -> b.getUsos().stream())
+                    .map(UsoBono::getFecha)
+                    .toList();
+
+            LocalDateTime fechaUltimaSesion = fechasOcupadas.stream()
+                    .map(LocalDate::atStartOfDay)
+                    .max(Comparator.naturalOrder())
+                    .orElse(LocalDateTime.now());
+
             Bono nuevoBono = new Bono();
             nuevoBono.setUsuario(u);
             nuevoBono.setTipo(tipo);
             nuevoBono.setEspecialidad(especialidad);
-
             int maxUsos = (tipo == TipoBono.TIPO1) ? 10 : 5;
             nuevoBono.setMax_usos(maxUsos);
-
             Bono bonoGuardado = bonoRepository.save(nuevoBono);
 
             List<Clase> clasesAsignables = claseRepository.findAll().stream()
                     .filter(c -> c.getEspecialidad().equals(especialidad))
-                    .filter(c -> c.getFecha().isAfter(java.time.LocalDateTime.now()))
-                    .sorted(java.util.Comparator.comparing(Clase::getFecha))
+                    .filter(c -> c.getFecha().isAfter(fechaUltimaSesion))
+                    .filter(c -> !fechasOcupadas.contains(c.getFecha().toLocalDate()))
+                    .sorted(Comparator.comparing(Clase::getFecha))
                     .limit(maxUsos)
                     .toList();
 
@@ -153,7 +165,6 @@ public class UsuarioService {
                 UsoBono usoAutomatico = new UsoBono();
                 usoAutomatico.setBono(bonoGuardado);
                 usoAutomatico.setFecha(clase.getFecha().toLocalDate());
-
                 usoBonoRepository.save(usoAutomatico);
             }
         }
@@ -162,37 +173,42 @@ public class UsuarioService {
     //Borra el uso actual y busca la siguiente clase disponible
     @Transactional
     public void cancelarYReasignar(Long usoId) {
-        UsoBono usoActual = usoBonoRepository.findById(usoId)
-                .orElseThrow(() -> new RuntimeException("Uso no encontrado"));
+        UsoBono usoACancelar = usoBonoRepository.findById(usoId).orElse(null);
+        if (usoACancelar == null) return;
 
-        Bono bono = usoActual.getBono();
-        LocalDate fechaCancelada = usoActual.getFecha();
+        Bono bono = usoACancelar.getBono();
+        Usuario usuario = bono.getUsuario();
+        Especialidad especialidad = bono.getEspecialidad();
 
-        List<LocalDate> fechasOcupadas = bono.getUsos().stream()
+        List<LocalDate> fechasOcupadasActualmente = usuario.getBonos().stream()
+                .filter(b -> b.getEspecialidad().equals(especialidad))
+                .flatMap(b -> b.getUsos().stream())
                 .map(UsoBono::getFecha)
-                .filter(f -> !f.equals(fechaCancelada))
-                .toList();
+                .collect(Collectors.toList());
+
+        LocalDate fechaUltima = fechasOcupadasActualmente.stream()
+                .max(Comparator.naturalOrder())
+                .orElse(LocalDate.now());
+
+        usoBonoRepository.delete(usoACancelar);
+
+        bono.getUsos().remove(usoACancelar);
 
         Clase siguienteClase = claseRepository.findAll().stream()
-                .filter(c -> c.getEspecialidad().equals(bono.getEspecialidad()))
-                .filter(c -> c.getFecha().toLocalDate().isAfter(fechaCancelada)) // Evita bucles
-                .filter(c -> !fechasOcupadas.contains(c.getFecha().toLocalDate()))
+                .filter(c -> c.getEspecialidad().equals(especialidad))
+                .filter(c -> !(c instanceof ClaseTipo3))
+                .filter(c -> c.getFecha().toLocalDate().isAfter(fechaUltima))
+                .filter(c -> !fechasOcupadasActualmente.contains(c.getFecha().toLocalDate()))
                 .sorted(Comparator.comparing(Clase::getFecha))
                 .findFirst()
                 .orElse(null);
-
-        usoBonoRepository.delete(usoActual);
-        bono.getUsos().remove(usoActual);
 
         if (siguienteClase != null) {
             UsoBono nuevoUso = new UsoBono();
             nuevoUso.setBono(bono);
             nuevoUso.setFecha(siguienteClase.getFecha().toLocalDate());
             usoBonoRepository.save(nuevoUso);
-            bono.getUsos().add(nuevoUso);
         }
-
-        bono.getUsos().sort(Comparator.comparing(UsoBono::getFecha));
     }
 
     //Inscripción en clases tipo 3

@@ -1,49 +1,56 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Clase Tipo 3</title>
+    <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="flex-center-container">
+<div class="card-form">
+    <!-- El th:object debe coincidir con el nombre que pases desde el Model en el Controller -->
+    <form th:action="@{/saveClaseTipo3}" th:object="${clase3}" method="post">
 
-    <head>
-        <meta charset="UTF-8">
-        <title>Clases Tipo3</title>
-        <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.png}">
-        <link rel="stylesheet" th:href="@{/css/style.css}">
-    </head>
-    <body class="flex-center-container">
-        <div class="card-form">
+        <!-- CAMBIO CLAVE 1: Input oculto para el ID.
+             Si es nulo, crea una clase. Si tiene valor, la edita. -->
+        <input type="hidden" th:field="*{id}">
 
-            <form th:action="@{/saveClaseTipo3}" th:object="${clase3}" method="post">
-                <h2>Nueva Clase Grupal (Tipo 3)</h2>
+        <h2 th:text="*{id == null ? 'Nueva Clase Grupal (Tipo 3)' : 'Editar Clase Grupal (Tipo 3)'}">
+            Formulario de Clase
+        </h2>
 
-                <label>Fecha de la Clase:</label>
-                <input type="datetime-local" th:field="*{fecha}" required />
-                <br><br>
+        <label>Fecha de la Clase:</label>
+        <input type="datetime-local" th:field="*{fecha}" required />
+        <br><br>
 
-                <label>Especialidad de la Clase:</label>
-                <select th:field="*{especialidad}" required>
-                    <option value="">Selecciona el tipo de deporte/clase</option>
-                    <option th:each="esp : ${especialidades}"
-                            th:value="${esp}"
-                            th:text="${esp}"></option>
-                </select>
-                <br><br>
+        <label>Especialidad de la Clase:</label>
+        <select th:field="*{especialidad}" required>
+            <option value="">Selecciona el tipo de deporte/clase</option>
+            <option th:each="esp : ${especialidades}"
+                    th:value="${esp}"
+                    th:text="${esp}"></option>
+        </select>
+        <br><br>
 
-                <label>Cupo Máximo de Personas:</label>
-                <input type="number" th:field="*{cupoMax}" min="1" required />
-                <br><br>
+        <label>Cupo Máximo de Personas:</label>
+        <input type="number" th:field="*{cupoMax}" min="1" required />
+        <br><br>
 
-                <label>Entrenador Responsable:</label>
-                <select th:field="*{entrenador}" required>
-                    <option value="">Seleccione un entrenador...</option>
-                    <option th:each="e : ${entrenadores}"
-                            th:value="${e.id}"
-                            th:text="${e.nombre}"></option>
-                </select>
-                <br><br>
+        <label>Entrenador Responsable:</label>
+        <select th:field="*{entrenador}" required>
+            <option value="">Seleccione un entrenador...</option>
+            <option th:each="e : ${entrenadores}"
+                    th:value="${e.id}"
+                    th:text="${e.nombre}"></option>
+        </select>
+        <br><br>
 
-                <div class="acciones">
-                <button type="submit" class="btn alta">Guardar</button>
-                <a th:href="@{/admin}" class="btn baja">Cancelar</a>
-                </div>
-            </form>
+        <div class="acciones">
+            <button type="submit" class="btn alta">Guardar</button>
+            <!-- CAMBIO CLAVE 2: Redirigir al listado de clases al cancelar -->
+            <a th:href="@{/clases3}" class="btn baja">Cancelar</a>
         </div>
-    </body>
+    </form>
+</div>
+</body>
 </html>

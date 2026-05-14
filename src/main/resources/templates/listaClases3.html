@@ -1,40 +1,73 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Listado de Clases Tipo 3</title>
     <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.png}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-    <h2>Listado de Clases Tipo 3</h2>
-    <div style="margin: 20px auto; width: 80%;">
-        <a th:href="@{/admin}" class="btn">← Volver al Panel de Usuarios</a>
-    </div>
-    <div class="table-container">
-        <table class="styled-table">
+<div class="header">
+    <h2><span>DeportesUGR</span> &nbsp;|&nbsp; Listado de Clases Tipo 3</h2>
+</div>
+
+<div style="margin: 20px auto; width: 85%; display: flex; justify-content: space-between; align-items: center;">
+    <a th:href="@{/admin}" class="btn">← Volver al Panel Admin</a>
+    <a th:href="@{/newClaseTipo3}" class="btn clases">+ Crear Nueva Clase</a>
+</div>
+
+<div class="table-container">
+    <table class="styled-table">
         <thead>
-            <tr>
-                <th>ID</th>
-                <th>Fecha</th>
-                <th>Especialidad</th>
-                <th>Cupo Max</th>
-                <th>Entrenador</th>
-                <th>Inscritos</th>
-            </tr>
+        <tr>
+            <th>ID</th>
+            <th>Fecha y Hora</th>
+            <th>Especialidad</th>
+            <th>Cupo Máximo</th>
+            <th>Entrenador</th>
+            <th>Inscritos</th>
+            <th>Acciones</th> <!-- Nueva columna -->
+        </tr>
         </thead>
         <tbody>
         <tr th:each="c : ${clases}"
             th:if="${c instanceof T(com.optativaGS.deportesUGR.modelos.ClaseTipo3)}">
-                <td th:text="${c.id}"></td>
-                <td th:text="${c.fecha}"></td>
-                <td th:text="${c.especialidad}"></td>
-                <td th:text="${c.cupoMax}"></td>
-                <td th:text="${c.entrenador != null ? c.entrenador.nombre : 'Sin asignar'}"></td>
-                <td th:text="${c.inscripciones != null} ? ${#lists.size(c.inscripciones)} : 0"></td>
-            </tr>
+
+            <td th:text="${c.id}"></td>
+
+            <!-- Formateo de fecha para que sea más legible -->
+            <td th:text="${c.fecha != null ? #temporals.format(c.fecha, 'dd/MM/yyyy HH:mm') : '---'}"></td>
+
+            <td th:text="${c.especialidad}" style="font-weight: bold;"></td>
+
+            <td th:text="${c.cupoMax}"></td>
+
+            <td>
+                        <span th:text="${c.entrenador != null ? c.entrenador.nombre : 'Sin asignar'}"
+                              th:style="${c.entrenador == null ? 'color: orange; font-style: italic;' : ''}"></span>
+            </td>
+
+            <td th:text="${c.inscripciones != null} ? ${#lists.size(c.inscripciones)} : 0"></td>
+
+            <!-- BOTONES DE ACCIÓN -->
+            <td>
+                <div class="acciones-cell">
+                    <a th:href="@{/editClaseTipo3/{id}(id=${c.id})}" class="btn btn-sm clases">Editar</a>
+
+                    <a th:href="@{/delClaseTipo3/{id}(id=${c.id})}"
+                       class="btn btn-sm baja"
+                       onclick="return confirm('¿Estás seguro de que quieres eliminar esta clase puntual?')">Eliminar</a>
+                </div>
+            </td>
+        </tr>
         </tbody>
     </table>
-    </div>
+</div>
+
+<!-- Mensaje si no hay clases -->
+<div th:if="${#lists.isEmpty(clases)}" style="text-align: center; margin-top: 50px; color: #666;">
+    <p>No hay clases Tipo 3 registradas en el sistema.</p>
+</div>
+
 </body>
 </html>

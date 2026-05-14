@@ -131,6 +131,27 @@ public class UsuarioController {
         return "redirect:/admin";
     }
 
+    //Formulario para editar las clases de tipo 3
+    @GetMapping("/editClaseTipo3/{id}")
+    public String editClaseTipo3Form(@PathVariable Long id, Model model) {
+        Clase clase = claseService.findById(id);
+
+        if (clase instanceof ClaseTipo3) {
+            model.addAttribute("clase3", clase);
+            model.addAttribute("entrenadores", usuarioService.findEntrenadores());
+            model.addAttribute("especialidades", Especialidad.values());
+            return "formularioAltaClase3";
+        }
+        return "redirect:/clases3";
+    }
+
+    //Eliminar clases del tipo 3
+    @GetMapping("/delClaseTipo3/{id}")
+    public String eliminarClaseTipo3(@PathVariable Long id) {
+        claseService.delete(id);
+        return "redirect:/clases3";
+    }
+
     //Elimina un usuario
     @GetMapping("/delUsuario/{id}")
     public String eliminarUsuario(@PathVariable Long id){
@@ -154,8 +175,19 @@ public class UsuarioController {
             return "redirect:/login";
         }
 
+        List<Clase> clasesAsignadas = claseService.findAll().stream()
+                .filter(c -> c.getEspecialidad() != null && c.getEspecialidad().equals(entrenador.especialidad()))
+                .filter(c -> {
+                    if (c instanceof ClaseTipo3 c3) {
+                        return c3.getEntrenador() != null && c3.getEntrenador().getId().equals(id);
+                    }
+                    return true;
+                })
+                .sorted(Comparator.comparing(Clase::getFecha))
+                .toList();
+
         model.addAttribute("entrenador", entrenador);
-        model.addAttribute("clases", claseService.findByEntrenadorId(id));
+        model.addAttribute("clases", clasesAsignadas);
 
         return "indexEntrenador";
     }
@@ -175,13 +207,24 @@ public class UsuarioController {
         Usuario usuarioReal = usuarioService.findEntityById(id);
 
         List<Bono> misBonos = new ArrayList<>();
+        java.util.Map<Long, Boolean> mapaBloqueo = new java.util.HashMap<>();
+
         if (usuarioReal != null && usuarioReal.getBonos() != null) {
             misBonos = usuarioReal.getBonos();
+
             misBonos.forEach(bono -> {
                 if (bono.getUsos() != null) {
                     bono.getUsos().sort(Comparator.comparing(UsoBono::getFecha));
                 }
             });
+
+            for (Bono b : misBonos) {
+                boolean tieneBonoPosterior = misBonos.stream()
+                        .anyMatch(otro -> otro.getEspecialidad().equals(b.getEspecialidad())
+                                && otro.getId() > b.getId());
+
+                mapaBloqueo.put(b.getId(), tieneBonoPosterior);
+            }
         }
 
         List<Especialidad> misEspecialidades = misBonos.stream()
@@ -201,6 +244,7 @@ public class UsuarioController {
 
         model.addAttribute("usuario", usuarioDTO);
         model.addAttribute("misBonos", misBonos);
+        model.addAttribute("mapaBloqueo", mapaBloqueo);
         model.addAttribute("clases", clasesBonos);
         model.addAttribute("clasesEspeciales", clasesEspeciales);
         model.addAttribute("tieneBonos", !misBonos.isEmpty());

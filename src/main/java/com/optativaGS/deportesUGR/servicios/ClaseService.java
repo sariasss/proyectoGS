@@ -91,25 +91,27 @@ public class ClaseService {
 
         LocalDate dia = inicio;
         while (!dia.isAfter(fin)) {
-            DayOfWeek diaSemana = dia.getDayOfWeek();
 
-            //Lógica de Sábados de Partido
-            LocalDate primerSabado = dia.with(TemporalAdjusters.firstInMonth(DayOfWeek.SATURDAY));
-            LocalDate segundoSabado = primerSabado.plusWeeks(1);
+            if (esFechaLaborable(dia)) {
+                DayOfWeek diaSemana = dia.getDayOfWeek();
 
-            boolean esHoyPartido = (esp == Especialidad.FUTBOL && dia.equals(primerSabado)) ||
-                    (esp == Especialidad.BALONCESTO && dia.equals(segundoSabado));
+                LocalDate primerSabado = dia.with(TemporalAdjusters.firstInMonth(DayOfWeek.SATURDAY));
+                LocalDate segundoSabado = primerSabado.plusWeeks(1);
 
-            if (esDiaDeClase(esp, diaSemana) || esHoyPartido) {
-                ClaseTipo1 c1 = new ClaseTipo1();
-                c1.setFecha(dia.atTime(obtenerHoraEspecialidad(esp)));
-                c1.setEspecialidad(esp);
-                c1.setEntrenador(entrenador);
+                boolean esHoyPartido = (esp == Especialidad.FUTBOL && dia.equals(primerSabado)) ||
+                        (esp == Especialidad.BALONCESTO && dia.equals(segundoSabado));
 
-                c1.setDuracionMinutos(obtenerDuracion(esp, esHoyPartido));
+                if (esDiaDeClase(esp, diaSemana) || esHoyPartido) {
+                    ClaseTipo1 c1 = new ClaseTipo1();
+                    c1.setFecha(dia.atTime(obtenerHoraEspecialidad(esp)));
+                    c1.setEspecialidad(esp);
+                    c1.setEntrenador(entrenador);
+                    c1.setDuracionMinutos(obtenerDuracion(esp, esHoyPartido));
 
-                claseRepository.save(c1);
+                    claseRepository.save(c1);
+                }
             }
+
             dia = dia.plusDays(1);
         }
     }
@@ -160,5 +162,18 @@ public class ClaseService {
         // Debug opcional: imprime las clases para ver si alguna es Tipo1
         // lista.forEach(c -> System.out.println(c.getClass().getSimpleName()));
         return lista;
+    }
+
+    private boolean esFechaLaborable(LocalDate fecha) {
+        int mes = fecha.getMonthValue();
+        int dia = fecha.getDayOfMonth();
+
+        if (mes == 8) return false;
+
+        if ((mes == 12 && dia >= 22) || (mes == 1 && dia <= 7)) return false;
+
+        if ((mes == 3 && dia >= 29) || (mes == 4 && dia <= 5)) return false;
+
+        return true;
     }
 }

@@ -15,6 +15,8 @@
         .session-item:hover { background-color: #fff5f5; }
         .btn-ugr { background-color: var(--ugr-red); color: white; border-radius: 20px; }
         .btn-ugr:hover { background-color: #8e2a20; color: white; }
+        .badge-count { font-size: 0.9rem; padding: 0.5em 1em; }
+        .text-locked { color: #adb5bd; }
     </style>
 </head>
 <body>
@@ -27,6 +29,9 @@
             <button class="btn btn-light btn-sm rounded-pill fw-bold text-danger" data-bs-toggle="modal" data-bs-target="#modalCompra">
                 <i class="fas fa-shopping-cart me-1"></i>Nuevo Bono
             </button>
+            <a th:href="@{/logout}" class="text-white ms-3" title="Cerrar sesión">
+                <i class="fas fa-sign-out-alt fa-lg"></i>
+            </a>
         </div>
     </div>
 </nav>
@@ -37,6 +42,7 @@
     <div class="row mb-4">
         <div class="col-12">
             <h3 class="fw-bold"><i class="fas fa-ticket-alt me-2 text-danger"></i>Mis Bonos</h3>
+            <p class="text-muted small">Las sesiones son consecutivas. Los bonos antiguos se bloquean al adquirir uno nuevo de la misma especialidad.</p>
             <hr class="w-25">
         </div>
     </div>
@@ -44,6 +50,7 @@
     <div class="row">
         <!-- Si no tiene bonos -->
         <div th:if="${!tieneBonos}" class="col-12 text-center py-5 bg-white rounded-4 shadow-sm mb-5">
+            <i class="fas fa-info-circle fa-3x text-light mb-3"></i>
             <p class="text-muted">No tienes bonos activos actualmente.</p>
             <button class="btn btn-ugr px-4" data-bs-toggle="modal" data-bs-target="#modalCompra">Comprar mi primer bono</button>
         </div>
@@ -54,24 +61,38 @@
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div>
-                            <h4 class="fw-bold mb-0" th:text="${b.especialidad}">Tenis</h4>
-                            <small class="text-muted" th:text="${b.tipo}"></small>
+                            <h4 class="fw-bold mb-0 text-dark" th:text="${b.especialidad}">Especialidad</h4>
+                            <span class="badge bg-light text-muted border mt-1" th:text="${b.tipo}">Tipo</span>
                         </div>
-                        <span class="badge bg-danger rounded-pill px-3" th:text="${b.usos.size() + ' / ' + b.max_usos}"></span>
+                        <span class="badge bg-danger rounded-pill badge-count" th:text="${b.usos.size() + ' / ' + b.max_usos}">0 / 10</span>
                     </div>
 
                     <h6 class="small fw-bold text-uppercase text-muted border-bottom pb-2 mb-3">Sesiones Programadas</h6>
                     <div class="list-group list-group-flush">
+
                         <div th:each="uso : ${b.usos}" class="list-group-item session-item d-flex justify-content-between align-items-center bg-white">
-                            <div>
-                                <i class="far fa-calendar-check text-success me-2"></i>
-                                <span class="fw-medium" th:text="${#temporals.format(uso.fecha, 'dd/MM/yyyy')}"></span>
+                            <div th:classappend="${mapaBloqueo.get(b.id)} ? 'text-locked' : ''">
+                                <i class="far fa-calendar-check me-2" th:classappend="${mapaBloqueo.get(b.id)} ? 'text-muted' : 'text-success'"></i>
+                                <span class="fw-medium" th:text="${#temporals.format(uso.fecha, 'dd/MM/yyyy')}">Fecha</span>
                             </div>
-                            <form th:action="@{/uso/cancelar/{id}(id=${uso.id})}" method="post"
-                                  onsubmit="return confirm('¿Cancelar esta clase y buscar la siguiente fecha disponible?');">
+
+                            <!-- LÓGICA DE BLOQUEO: Si el bono tiene sucesores, mostramos candado. Si no, la X de cancelar -->
+                            <div th:if="${mapaBloqueo.get(b.id)}" class="text-muted" title="Bono consolidado (no editable)">
+                                <i class="fas fa-lock"></i>
+                            </div>
+
+                            <form th:unless="${mapaBloqueo.get(b.id)}"
+                                  th:action="@{/uso/cancelar/{id}(id=${uso.id})}" method="post"
+                                  onsubmit="return confirm('¿Estás seguro de que quieres cancelar esta sesión?');">
                                 <input type="hidden" name="usuarioId" th:value="${usuario.id}">
-                                <button type="submit" class="btn btn-sm btn-outline-danger border-0"><i class="fas fa-times-circle"></i></button>
+                                <button type="submit" class="btn btn-sm text-danger border-0">
+                                    <i class="fas fa-times-circle fa-lg"></i>
+                                </button>
                             </form>
+                        </div>
+
+                        <div th:if="${#lists.isEmpty(b.usos)}" class="text-center py-2">
+                            <small class="text-muted">No hay sesiones pendientes.</small>
                         </div>
                     </div>
                 </div>
@@ -83,7 +104,7 @@
     <div class="row mt-5 mb-4">
         <div class="col-12">
             <h3 class="fw-bold"><i class="fas fa-star me-2 text-warning"></i>Eventos Especiales</h3>
-            <p class="text-muted">Clases gratuitas exclusivas para poseedores de cualquier bono.</p>
+            <p class="text-muted">Acceso gratuito incluido con cualquier bono activo.</p>
         </div>
     </div>
 
@@ -91,33 +112,24 @@
         <div th:each="ce : ${clasesEspeciales}" class="col-md-4 mb-4">
             <div class="card card-especial shadow-sm h-100">
                 <div class="card-body p-4">
-                    <span class="badge bg-warning text-dark mb-2">TIPO 3</span>
-                    <h5 class="fw-bold" th:text="${ce.especialidad}">Nombre Clase</h5>
+                    <span class="badge bg-warning text-dark mb-2">ESPECIAL TIPO 3</span>
+                    <h5 class="fw-bold text-dark" th:text="${ce.especialidad}">Nombre Clase</h5>
                     <p class="small text-muted mb-4">
-                        <i class="far fa-calendar-alt me-1"></i> <span th:text="${#temporals.format(ce.fecha, 'dd/MM/yyyy HH:mm')}"></span><br>
-                        <i class="far fa-clock me-1"></i> Duración: <span th:text="${ce.duracionMinutos}"></span> min
+                        <i class="far fa-calendar-alt me-1"></i> <span th:text="${#temporals.format(ce.fecha, 'dd/MM/yyyy HH:mm')}">Fecha</span><br>
+                        <i class="far fa-clock me-1"></i> Duración: <span th:text="${ce.duracionMinutos}">60</span> min
                     </p>
 
-                    <form th:action="@{/clase/inscribir-especial}" method="post">
+                    <form th:action="@{/clase/inscribir-especial/{claseId}(claseId=${ce.id})}" method="post">
                         <input type="hidden" name="usuarioId" th:value="${usuario.id}">
-                        <input type="hidden" name="claseId" th:value="${ce.id}">
-
-                        <!-- Si tiene bonos: Botón habilitado -->
                         <button th:if="${tieneBonos}" type="submit" class="btn btn-dark w-100 rounded-pill shadow-sm">
                             Inscribirse Gratis
                         </button>
-
-                        <!-- Si NO tiene bonos: Botón bloqueado -->
                         <button th:unless="${tieneBonos}" type="button" class="btn btn-light w-100 rounded-pill text-muted border" disabled>
-                            <i class="fas fa-lock me-2"></i>Requiere Bono Activo
+                            <i class="fas fa-lock me-2"></i>Requiere Bono
                         </button>
                     </form>
                 </div>
             </div>
-        </div>
-
-        <div th:if="${#lists.isEmpty(clasesEspeciales)}" class="col-12 text-center py-4 text-muted">
-            <p>No hay eventos especiales programados próximamente.</p>
         </div>
     </div>
 </div>
@@ -126,12 +138,19 @@
 <div class="modal fade" id="modalCompra" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
             <div class="modal-body p-5 text-center">
                 <i class="fas fa-ticket-alt fa-3x text-danger mb-3"></i>
                 <h4 class="fw-bold mb-4">¿Qué bono prefieres?</h4>
                 <div class="d-grid gap-3">
-                    <a th:href="@{/elegirEspecialidad/{id}/TIPO1(id=${usuario.id})}" class="btn btn-outline-danger py-3 fw-bold">Bono Grupal (10 clases)</a>
-                    <a th:href="@{/elegirEspecialidad/{id}/TIPO2(id=${usuario.id})}" class="btn btn-outline-dark py-3 fw-bold">Bono Individual (5 clases)</a>
+                    <a th:href="@{/elegirEspecialidad/{id}/TIPO1(id=${usuario.id})}" class="btn btn-outline-danger py-3 fw-bold rounded-pill">
+                        Bono Grupal (10 clases)
+                    </a>
+                    <a th:href="@{/elegirEspecialidad/{id}/TIPO2(id=${usuario.id})}" class="btn btn-outline-dark py-3 fw-bold rounded-pill">
+                        Bono Individual (5 clases)
+                    </a>
                 </div>
             </div>
         </div>
