@@ -2,6 +2,7 @@ package com.optativaGS.deportesUGR.servicios;
 
 import com.optativaGS.deportesUGR.modelos.*;
 import com.optativaGS.deportesUGR.respositorios.ClaseRepository;
+import com.optativaGS.deportesUGR.respositorios.UsoBonoRepository;
 import com.optativaGS.deportesUGR.respositorios.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import java.util.Map;
 public class ClaseService {
     private final ClaseRepository claseRepository;
     private final UsuarioRepository usuarioRepository;
+    private final UsoBonoRepository usoBonoRepository;
 
     public List<Clase> findAll(){
         return claseRepository.findAll();
@@ -175,5 +177,37 @@ public class ClaseService {
         if ((mes == 3 && dia >= 29) || (mes == 4 && dia <= 5)) return false;
 
         return true;
+    }
+
+    public void aceptarCambioFecha(Long usoId) {
+        UsoBono uso = usoBonoRepository.findById(usoId)
+                .orElseThrow(() -> new RuntimeException("Uso de bono no encontrado"));
+
+        if (uso.getFechaPropuesta() != null) {
+            // La fecha oficial de la clase ahora es la propuesta por el usuario
+            uso.setFecha(uso.getFechaPropuesta());
+            // Limpiamos la propuesta y marcamos como aceptada
+            uso.setFechaPropuesta(null);
+            uso.setEstadoSolicitud(EstadoSolicitud.ACEPTADA);
+
+            usoBonoRepository.save(uso);
+        }
+    }
+
+    public void rechazarCambioFecha(Long usoId) {
+        UsoBono uso = usoBonoRepository.findById(usoId)
+                .orElseThrow(() -> new RuntimeException("Uso de bono no encontrado"));
+
+        // Eliminamos la propuesta sin cambiar la fecha original
+        uso.setFechaPropuesta(null);
+        uso.setEstadoSolicitud(EstadoSolicitud.RECHAZADA);
+
+        usoBonoRepository.save(uso);
+    }
+
+    public List<UsoBono> findSolicitudesPendientes() {
+        return usoBonoRepository.findAll().stream()
+                .filter(u -> u.getEstadoSolicitud() == EstadoSolicitud.PENDIENTE)
+                .toList();
     }
 }

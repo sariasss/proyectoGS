@@ -24,7 +24,7 @@
         }
         .btn-filter:hover { background: #f8f9fa; }
         .btn-filter.active {
-            background-color: #6c5ce7; /* Color principal (puedes cambiarlo a var(--plum)) */
+            background-color: #6c5ce7;
             color: white;
             border-color: #6c5ce7;
             box-shadow: 0 4px 10px rgba(108, 92, 231, 0.2);
@@ -34,6 +34,21 @@
         /* Badges adicionales */
         .badge-tipo2 { background-color: #2c3e50; color: white; }
         .time-error { color: #e74c3c; font-size: 0.8rem; }
+
+        /* Estilos para solicitudes */
+        .solicitud-card {
+            background: #fff;
+            border-left: 5px solid #f0ad4e;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .fecha-cambio {
+            color: #6c5ce7;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
     </style>
 </head>
 <body>
@@ -48,6 +63,56 @@
 </div>
 
 <div class="container">
+
+    <!-- ====================================================== -->
+    <!-- NUEVA SECCIÓN: SOLICITUDES PENDIENTES                  -->
+    <!-- ====================================================== -->
+    <div th:if="${!#lists.isEmpty(solicitudes)}">
+        <h3 style="color: #e67e22; margin-top: 30px;">📩 Solicitudes de cambio de fecha</h3>
+        <p style="font-size: 0.9rem; color: #666;">Los siguientes usuarios han solicitado mover su sesión de entrenamiento:</p>
+
+        <div class="table-container">
+            <table class="styled-table" style="border-top: 3px solid #f0ad4e;">
+                <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Fecha Actual</th>
+                    <th>Nueva Fecha Solicitada</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="s : ${solicitudes}">
+                    <td>
+                        <strong th:text="${s.bono.usuario.nombre}">Usuario</strong><br>
+                        <small th:text="${s.bono.usuario.email}">email@ugr.es</small>
+                    </td>
+                    <td th:text="${s.fecha}">10/05/2026</td>
+                    <td class="fecha-cambio" th:text="${s.fechaPropuesta}">15/05/2026</td>
+                    <td>
+                        <div style="display: flex; gap: 8px;">
+                            <!-- Formulario Aceptar -->
+                            <form th:action="@{/solicitud/aceptar/{id}(id=${s.id})}" method="post">
+                                <input type="hidden" name="entrenadorId" th:value="${entrenador.id}">
+                                <button type="submit" class="btn btn-sm alta">Aceptar</button>
+                            </form>
+                            <!-- Formulario Rechazar -->
+                            <form th:action="@{/solicitud/rechazar/{id}(id=${s.id})}" method="post">
+                                <input type="hidden" name="entrenadorId" th:value="${entrenador.id}">
+                                <button type="submit" class="btn btn-sm baja">Rechazar</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <hr style="margin: 40px 0; border: 0; border-top: 1px dashed #ccc;">
+    </div>
+
+    <!-- ====================================================== -->
+    <!-- SECCIÓN ORIGINAL: MIS CLASES ASIGNADAS                 -->
+    <!-- ====================================================== -->
     <h3>Mis clases asignadas</h3>
 
     <!-- BOTONES DE FILTRO -->
@@ -69,32 +134,24 @@
             </tr>
             </thead>
             <tbody id="tableBody">
-            <!-- Cada fila tiene una clase dinámica según su tipo para el filtro JS -->
             <tr th:each="c : ${clases}"
                 th:class="${c instanceof T(com.optativaGS.deportesUGR.modelos.ClaseTipo3)} ? 'row-tipo3' : 'row-tipo1-2'">
 
-                <!-- Día de la semana y fecha -->
                 <td>
                     <span class="day-text" th:text="${c.fecha != null ? #temporals.format(c.fecha, 'EEEE') : '---'}">Lunes</span>
                     <small th:text="${c.fecha != null ? #temporals.format(c.fecha, 'dd/MM/yyyy') : '--/--/--'}">01/01/2026</small>
                 </td>
 
-                <!-- Horario calculado (Protección contra nulos en duracionMinutos) -->
                 <td>
                     <span class="time-box">
                         <span th:text="${c.fecha != null ? #temporals.format(c.fecha, 'HH:mm') : '--:--'}">17:00</span>
                         &ndash;
                         <span th:text="${c.fecha != null ? #temporals.format(c.fecha.plusMinutes(c.duracionMinutos ?: 0), 'HH:mm') : '--:--'}">18:00</span>
                     </span>
-                    <span class="duration-text">
-                        <i th:text="${(c.duracionMinutos ?: 0)} + ' min de sesión'">60 min</i>
-                    </span>
                 </td>
 
-                <!-- Especialidad -->
-                <td style="font-weight: 600; color: var(--plum, #6c5ce7);" th:text="${c.especialidad}">Fútbol</td>
+                <td style="font-weight: 600; color: #6c5ce7;" th:text="${c.especialidad}">Fútbol</td>
 
-                <!-- Tipo de clase con badges -->
                 <td>
                     <span th:if="${c instanceof T(com.optativaGS.deportesUGR.modelos.ClaseTipo1)}"
                           class="badge tipo1">📅 Entrenamiento Grupal</span>
@@ -104,46 +161,33 @@
 
                     <span th:if="${c instanceof T(com.optativaGS.deportesUGR.modelos.ClaseTipo3)}"
                           class="badge tipo3">📌 Evento Puntual</span>
-
-                    <div th:if="${c.duracionMinutos == 120}">
-                        <span class="badge badge-partido">🏆 Partido mensual</span>
-                    </div>
                 </td>
 
-                <!-- Cupo / Inscritos -->
                 <td>
                     <div th:if="${c instanceof T(com.optativaGS.deportesUGR.modelos.ClaseTipo3)}">
                         <span class="inscritos-count" th:text="${#lists.size(c.inscripciones)}">0</span>
-                        <span style="color: var(--text-faint); font-size: 0.85rem;">/</span>
+                        <span style="color: #999;">/</span>
                         <span th:text="${c.cupoMax}">20</span>
                     </div>
                     <div th:unless="${c instanceof T(com.optativaGS.deportesUGR.modelos.ClaseTipo3)}">
-                        <span th:if="${c instanceof T(com.optativaGS.deportesUGR.modelos.ClaseTipo2)}"
-                              style="color: var(--text-faint); font-size: 0.82rem;">Personal</span>
-                        <span th:if="${c instanceof T(com.optativaGS.deportesUGR.modelos.ClaseTipo1)}"
-                              style="color: var(--text-faint); font-size: 0.82rem;">Grupo</span>
+                        <small style="color: #999;">Sesión de Bono</small>
                     </div>
                 </td>
-
             </tr>
             </tbody>
         </table>
     </div>
 
-    <div th:if="${#lists.isEmpty(clases)}" class="no-clases">
-        <img src="https://cdn-icons-png.flaticon.com/512/4076/4076402.png" width="72" style="opacity: 0.25; margin-bottom: 16px;">
-        <p>No tienes clases asignadas que coincidan con tu especialidad.</p>
+    <div th:if="${#lists.isEmpty(clases)}" class="no-clases" style="text-align: center; padding: 50px;">
+        <p>No tienes clases asignadas actualmente.</p>
     </div>
 </div>
 
-<!-- SCRIPT DE FILTRADO -->
 <script>
     function filterClases(tipo, btn) {
-        // Actualizar botones
         document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
 
-        // Seleccionar filas
         const rowsT12 = document.querySelectorAll('.row-tipo1-2');
         const rowsT3 = document.querySelectorAll('.row-tipo3');
 

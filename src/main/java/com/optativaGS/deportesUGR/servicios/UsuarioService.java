@@ -232,7 +232,13 @@ public class UsuarioService {
     }
 
     //Solicita cambiar una clase del tipo 2 al entrenador que la imparta
-    public void solicitarCambio(Long usoId) {
-        UsoBono uso = usoBonoRepository.findById(usoId).orElseThrow();
+    public void solicitarCambio(Long usoId, LocalDate fecha) {
+        UsoBono uso = usoBonoRepository.findById(usoId)
+                .orElseThrow(() -> new RuntimeException("No se encontró el uso de bono con ID: " + usoId));
+
+        uso.setFechaPropuesta(fecha);
+        uso.setEstadoSolicitud(EstadoSolicitud.PENDIENTE);
+
+        usoBonoRepository.save(uso);
     }
 }

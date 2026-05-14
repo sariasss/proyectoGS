@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -186,8 +187,13 @@ public class UsuarioController {
                 .sorted(Comparator.comparing(Clase::getFecha))
                 .toList();
 
+        List<UsoBono> solicitudesPendientes = claseService.findSolicitudesPendientes().stream()
+                .filter(u -> u.getBono().getEspecialidad().equals(entrenador.especialidad()))
+                .toList();
+
         model.addAttribute("entrenador", entrenador);
         model.addAttribute("clases", clasesAsignadas);
+        model.addAttribute("solicitudes", solicitudesPendientes);
 
         return "indexEntrenador";
     }
@@ -268,6 +274,7 @@ public class UsuarioController {
         return "elegirEspecialidad";
     }
 
+    //Confirmar la compra del bono
     @PostMapping("/confirmarCompraBono")
     public String confirmarCompraBono(
             @RequestParam Long usuarioId,
@@ -279,15 +286,18 @@ public class UsuarioController {
         return "redirect:/indexUsuario/" + usuarioId;
     }
 
+    //Cancelar uso del bono
     @PostMapping("/uso/cancelar/{id}")
     public String cancelarUso(@PathVariable Long id, @RequestParam Long usuarioId) {
         usuarioService.cancelarYReasignar(id);
         return "redirect:/indexUsuario/" + usuarioId;
     }
 
+    //Solicitar cambio de clase tipo 2
     @PostMapping("/uso/solicitar-cambio/{id}")
-    public String solicitarCambio(@PathVariable Long id, @RequestParam Long usuarioId) {
-        usuarioService.solicitarCambio(id);
+    public String solicitarCambio(@PathVariable Long id, @RequestParam Long usuarioId, @RequestParam String nuevaFecha) {
+        LocalDate fecha = LocalDate.parse(nuevaFecha);
+        usuarioService.solicitarCambio(id, fecha);
         return "redirect:/indexUsuario/" + usuarioId;
     }
 
@@ -298,5 +308,19 @@ public class UsuarioController {
         } catch (Exception e) {
         }
         return "redirect:/indexUsuario/" + usuarioId;
+    }
+
+    //Aceptar la solicitud del usuario
+    @PostMapping("/solicitud/aceptar/{id}")
+    public String aceptarSolicitud(@PathVariable Long id, @RequestParam Long entrenadorId) {
+        claseService.aceptarCambioFecha(id);
+        return "redirect:/clasesEntrenador/" + entrenadorId;
+    }
+
+    //Rechazar la solicitud del usuario
+    @PostMapping("/solicitud/rechazar/{id}")
+    public String rechazarSolicitud(@PathVariable Long id, @RequestParam Long entrenadorId) {
+        claseService.rechazarCambioFecha(id);
+        return "redirect:/clasesEntrenador/" + entrenadorId;
     }
 }
