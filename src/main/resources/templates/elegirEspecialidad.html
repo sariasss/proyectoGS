@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Elegir Especialidad</title>
+</head>
+<body>
+<h2>Selecciona una especialidad para tu bono</h2>
+<div th:each="esp : ${especialidades}">
+    <form th:action="@{/confirmarCompraBono}" method="post">
+        <input type="hidden" name="usuarioId" th:value="${usuarioId}">
+        <input type="hidden" name="tipo" th:value="${tipoBono}">
+        <input type="hidden" name="especialidad" th:value="${esp}">
+        <button type="submit" th:text="${esp}">Especialidad</button>
+    </form>
+</div>
+</body>
+</html>

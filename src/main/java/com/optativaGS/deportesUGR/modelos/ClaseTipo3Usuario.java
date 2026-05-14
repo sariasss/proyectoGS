@@ -14,6 +14,7 @@ import java.io.Serializable;
 @ToString
 @EqualsAndHashCode
 @Table(name = "clase_tipo3_usuario")
+@IdClass(ClaseTipo3UsuarioId.class)
 public class ClaseTipo3Usuario implements Serializable {
     @Id
     @ManyToOne

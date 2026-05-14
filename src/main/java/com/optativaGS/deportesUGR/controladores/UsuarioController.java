@@ -1,10 +1,7 @@
 package com.optativaGS.deportesUGR.controladores;
 
 import com.optativaGS.deportesUGR.dto.UsuarioDTO;
-import com.optativaGS.deportesUGR.modelos.ClaseTipo3;
-import com.optativaGS.deportesUGR.modelos.Especialidad;
-import com.optativaGS.deportesUGR.modelos.RolUsuario;
-import com.optativaGS.deportesUGR.modelos.Usuario;
+import com.optativaGS.deportesUGR.modelos.*;
 import com.optativaGS.deportesUGR.servicios.ClaseService;
 import com.optativaGS.deportesUGR.servicios.UsuarioService;
 import jakarta.servlet.http.HttpSession;
@@ -12,6 +9,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -34,7 +35,7 @@ public class UsuarioController {
             model.addAttribute("usuario", usuario);
 
             return switch (usuario.rol()) {
-                case USUARIO -> "redirect:/indexUsuario";
+                case USUARIO -> "redirect:/indexUsuario/" + usuario.id();
                 case ADMIN -> "redirect:/admin";
                 case ENTRENADOR -> "redirect:/clasesEntrenador/" + usuario.id();
             };
@@ -157,5 +158,101 @@ public class UsuarioController {
         model.addAttribute("clases", claseService.findByEntrenadorId(id));
 
         return "indexEntrenador";
+    }
+
+    //Apuntarse a una clase
+    @PostMapping("/inscribir")
+    public String inscribirEnClase(@RequestParam Long usuarioId, @RequestParam Long claseId) {
+        usuarioService.inscribirUsuarioEnClase(usuarioId, claseId);
+
+        return "redirect:/indexUsuario/" + usuarioId;
+    }
+
+    //Muestra la pantalla del entrenador
+    @GetMapping("/indexUsuario/{id}")
+    public String indexUsuario(@PathVariable Long id, Model model) {
+        UsuarioDTO usuarioDTO = usuarioService.findById(id);
+        Usuario usuarioReal = usuarioService.findEntityById(id);
+
+        List<Bono> misBonos = new ArrayList<>();
+        if (usuarioReal != null && usuarioReal.getBonos() != null) {
+            misBonos = usuarioReal.getBonos();
+            misBonos.forEach(bono -> {
+                if (bono.getUsos() != null) {
+                    bono.getUsos().sort(Comparator.comparing(UsoBono::getFecha));
+                }
+            });
+        }
+
+        List<Especialidad> misEspecialidades = misBonos.stream()
+                .map(Bono::getEspecialidad)
+                .toList();
+
+        List<Clase> todasLasClases = claseService.findAll();
+
+        List<Clase> clasesBonos = todasLasClases.stream()
+                .filter(c -> !(c instanceof ClaseTipo3))
+                .filter(c -> misEspecialidades.contains(c.getEspecialidad()))
+                .toList();
+
+        List<Clase> clasesEspeciales = todasLasClases.stream()
+                .filter(c -> c instanceof ClaseTipo3)
+                .toList();
+
+        model.addAttribute("usuario", usuarioDTO);
+        model.addAttribute("misBonos", misBonos);
+        model.addAttribute("clases", clasesBonos);
+        model.addAttribute("clasesEspeciales", clasesEspeciales);
+        model.addAttribute("tieneBonos", !misBonos.isEmpty());
+
+        return "indexUsuario";
+    }
+
+    @PostMapping("/comprarBono/{id}")
+    public String comprarBono(@PathVariable Long id, @RequestParam TipoBono tipo) {
+        usuarioService.comprarBono(id, tipo);
+
+        return "redirect:/indexUsuario/" + id;
+    }
+
+    //Pantalla intermedia para elegir especialidad del bono
+    @GetMapping("/elegirEspecialidad/{usuarioId}/{tipo}")
+    public String elegirEspecialidad(@PathVariable Long usuarioId, @PathVariable TipoBono tipo, Model model) {
+        model.addAttribute("usuarioId", usuarioId);
+        model.addAttribute("tipoBono", tipo);
+        model.addAttribute("especialidades", Especialidad.values());
+        return "elegirEspecialidad";
+    }
+
+    @PostMapping("/confirmarCompraBono")
+    public String confirmarCompraBono(
+            @RequestParam Long usuarioId,
+            @RequestParam TipoBono tipo,
+            @RequestParam Especialidad especialidad) {
+
+        usuarioService.comprarBonoConEspecialidad(usuarioId, tipo, especialidad);
+
+        return "redirect:/indexUsuario/" + usuarioId;
+    }
+
+    @PostMapping("/uso/cancelar/{id}")
+    public String cancelarUso(@PathVariable Long id, @RequestParam Long usuarioId) {
+        usuarioService.cancelarYReasignar(id);
+        return "redirect:/indexUsuario/" + usuarioId;
+    }
+
+    @PostMapping("/uso/solicitar-cambio/{id}")
+    public String solicitarCambio(@PathVariable Long id, @RequestParam Long usuarioId) {
+        usuarioService.solicitarCambio(id);
+        return "redirect:/indexUsuario/" + usuarioId;
+    }
+
+    @PostMapping("/clase/inscribir-especial/{claseId}")
+    public String inscribirEspecial(@PathVariable Long claseId, @RequestParam Long usuarioId) {
+        try {
+            usuarioService.inscribirEnClaseEspecial(usuarioId, claseId);
+        } catch (Exception e) {
+        }
+        return "redirect:/indexUsuario/" + usuarioId;
     }
 }

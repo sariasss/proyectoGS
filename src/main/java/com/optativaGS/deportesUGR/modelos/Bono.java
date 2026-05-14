@@ -22,6 +22,9 @@ public class Bono {
     @Enumerated(value = EnumType.STRING)
     private TipoBono tipo;
 
+    @Enumerated(EnumType.STRING)
+    private Especialidad especialidad;
+
     @ManyToOne
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;

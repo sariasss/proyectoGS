@@ -1,18 +1,24 @@
 package com.optativaGS.deportesUGR.servicios;
 
 import com.optativaGS.deportesUGR.dto.UsuarioDTO;
-import com.optativaGS.deportesUGR.modelos.RolUsuario;
-import com.optativaGS.deportesUGR.modelos.Usuario;
-import com.optativaGS.deportesUGR.respositorios.UsuarioRepository;
+import com.optativaGS.deportesUGR.modelos.*;
+import com.optativaGS.deportesUGR.respositorios.*;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
+    private final BonoRepository bonoRepository;
+    private final UsoBonoRepository usoBonoRepository;
+    private final ClaseRepository claseRepository;
+    private final ClaseTipo3UsuarioRepository claseTipo3UsuarioRepository;
 
     public List<UsuarioDTO> findAll(){
         return usuarioRepository.findAll().stream()
@@ -85,4 +91,132 @@ public class UsuarioService {
         );
     }
 
+    public Usuario findEntityById(Long id) {
+        return usuarioRepository.findById(id).orElse(null);
+    }
+
+    public void comprarBono(Long usuarioId, TipoBono tipo) {
+        Usuario u = usuarioRepository.findById(usuarioId).orElse(null);
+        if (u != null) {
+            Bono nuevoBono = new Bono();
+            nuevoBono.setUsuario(u);
+            nuevoBono.setTipo(tipo);
+
+            if (tipo == TipoBono.TIPO1) {
+                nuevoBono.setMax_usos(10);
+            } else {
+                nuevoBono.setMax_usos(5);
+            }
+
+            bonoRepository.save(nuevoBono);
+        }
+    }
+
+    public void inscribirUsuarioEnClase(Long usuarioId, Long claseId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow();
+        Clase clase = claseRepository.findById(claseId).orElseThrow();
+
+        Bono bonoValido = usuario.getBonos().stream()
+                .filter(b -> b.getEspecialidad().equals(clase.getEspecialidad()))
+                .filter(b -> b.getUsos().size() < b.getMax_usos())
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No tienes bonos con sesiones disponibles para esta especialidad"));
+
+        UsoBono uso = new UsoBono();
+        uso.setFecha(clase.getFecha().toLocalDate());
+        uso.setBono(bonoValido);
+
+        usoBonoRepository.save(uso);
+    }
+
+    public void comprarBonoConEspecialidad(Long usuarioId, TipoBono tipo, Especialidad especialidad) {
+        Usuario u = usuarioRepository.findById(usuarioId).orElse(null);
+        if (u != null) {
+            Bono nuevoBono = new Bono();
+            nuevoBono.setUsuario(u);
+            nuevoBono.setTipo(tipo);
+            nuevoBono.setEspecialidad(especialidad);
+
+            int maxUsos = (tipo == TipoBono.TIPO1) ? 10 : 5;
+            nuevoBono.setMax_usos(maxUsos);
+
+            Bono bonoGuardado = bonoRepository.save(nuevoBono);
+
+            List<Clase> clasesAsignables = claseRepository.findAll().stream()
+                    .filter(c -> c.getEspecialidad().equals(especialidad))
+                    .filter(c -> c.getFecha().isAfter(java.time.LocalDateTime.now()))
+                    .sorted(java.util.Comparator.comparing(Clase::getFecha))
+                    .limit(maxUsos)
+                    .toList();
+
+            for (Clase clase : clasesAsignables) {
+                UsoBono usoAutomatico = new UsoBono();
+                usoAutomatico.setBono(bonoGuardado);
+                usoAutomatico.setFecha(clase.getFecha().toLocalDate());
+
+                usoBonoRepository.save(usoAutomatico);
+            }
+        }
+    }
+
+    //Borra el uso actual y busca la siguiente clase disponible
+    @Transactional
+    public void cancelarYReasignar(Long usoId) {
+        UsoBono usoActual = usoBonoRepository.findById(usoId)
+                .orElseThrow(() -> new RuntimeException("Uso no encontrado"));
+
+        Bono bono = usoActual.getBono();
+        LocalDate fechaCancelada = usoActual.getFecha();
+
+        List<LocalDate> fechasOcupadas = bono.getUsos().stream()
+                .map(UsoBono::getFecha)
+                .filter(f -> !f.equals(fechaCancelada))
+                .toList();
+
+        Clase siguienteClase = claseRepository.findAll().stream()
+                .filter(c -> c.getEspecialidad().equals(bono.getEspecialidad()))
+                .filter(c -> c.getFecha().toLocalDate().isAfter(fechaCancelada)) // Evita bucles
+                .filter(c -> !fechasOcupadas.contains(c.getFecha().toLocalDate()))
+                .sorted(Comparator.comparing(Clase::getFecha))
+                .findFirst()
+                .orElse(null);
+
+        usoBonoRepository.delete(usoActual);
+        bono.getUsos().remove(usoActual);
+
+        if (siguienteClase != null) {
+            UsoBono nuevoUso = new UsoBono();
+            nuevoUso.setBono(bono);
+            nuevoUso.setFecha(siguienteClase.getFecha().toLocalDate());
+            usoBonoRepository.save(nuevoUso);
+            bono.getUsos().add(nuevoUso);
+        }
+
+        bono.getUsos().sort(Comparator.comparing(UsoBono::getFecha));
+    }
+
+    //Inscripción en clases tipo 3
+    @Transactional
+    public void inscribirEnClaseEspecial(Long usuarioId, Long claseId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        Clase claseBase = claseRepository.findById(claseId)
+                .orElseThrow(() -> new RuntimeException("Clase no encontrada"));
+
+        if (usuario.getBonos() == null || usuario.getBonos().isEmpty()) {
+            throw new RuntimeException("Se requiere un bono activo para acceder.");
+        }
+
+        ClaseTipo3Usuario inscripcion = new ClaseTipo3Usuario();
+        inscripcion.setUsuario(usuario);
+        inscripcion.setClase((ClaseTipo3) claseBase);
+
+        claseTipo3UsuarioRepository.save(inscripcion);
+    }
+
+    //Solicita cambiar una clase del tipo 2 al entrenador que la imparta
+    public void solicitarCambio(Long usoId) {
+        UsoBono uso = usoBonoRepository.findById(usoId).orElseThrow();
+    }
 }
