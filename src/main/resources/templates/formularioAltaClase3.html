@@ -6,41 +6,56 @@
     <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.png}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
+
 <body class="flex-center-container">
+
 <div class="card-form">
-    <!-- El th:object debe coincidir con el nombre que pases desde el Model en el Controller -->
-    <form th:action="@{/saveClaseTipo3}" th:object="${clase3}" method="post">
 
-        <!-- CAMBIO CLAVE 1: Input oculto para el ID.
-             Si es nulo, crea una clase. Si tiene valor, la edita. -->
-        <input type="hidden" th:field="*{id}">
+    <h2 th:text="${clase3.id == null ? 'Nueva Clase Grupal (Tipo 3)' : 'Editar Clase Grupal (Tipo 3)'}">
+        Formulario de Clase
+    </h2>
 
-        <h2 th:text="*{id == null ? 'Nueva Clase Grupal (Tipo 3)' : 'Editar Clase Grupal (Tipo 3)'}">
-            Formulario de Clase
-        </h2>
+    <!-- ========================= -->
+    <!-- 🔵 PASO 1: FILTRAR -->
+    <!-- ========================= -->
+    <div th:if="${clase3.especialidad == null}">
 
-        <label>Especialidad de la Clase:</label>
-        <select name="especialidad" th:disabled="${clase3.especialidad != null}">
-            <option value="">-- Selecciona --</option>
-            <option th:each="esp : ${especialidades}"
-                    th:value="${esp}"
-                    th:text="${esp}"
-                    th:selected="${esp == clase3.especialidad}"></option>
-        </select>
+        <form th:action="@{/filtrarClaseTipo3}" th:object="${clase3}" method="post">
 
-        <!-- 2. CAMBIO CLAVE: Input oculto para que el valor llegue al servidor aunque el select esté disabled -->
-        <input type="hidden" th:if="${clase3.especialidad != null}"
-               th:field="*{especialidad}" />
+            <label>Especialidad de la Clase:</label>
 
-        <br><br>
+            <select th:field="*{especialidad}" required>
+                <option value="">-- Selecciona --</option>
+                <option th:each="esp : ${especialidades}"
+                        th:value="${esp}"
+                        th:text="${esp}">
+                </option>
+            </select>
 
-        <!-- 3. Solo mostramos el botón de filtrar si NO se ha elegido especialidad aún -->
-        <button type="submit" th:if="${clase3.especialidad == null}"
-                th:formmethod="get" th:formaction="@{/newClaseTipo3}" class="btn alta">
-            Ver entrenadores disponibles
-        </button>
+            <br><br>
 
-        <div th:if="${clase3.especialidad != null}">
+            <button type="submit" class="btn alta">
+                Ver entrenadores disponibles
+            </button>
+
+        </form>
+    </div>
+
+    <!-- ========================= -->
+    <!-- 🔵 PASO 2: FORM COMPLETO -->
+    <!-- ========================= -->
+    <div th:if="${clase3.especialidad != null}">
+
+        <form th:action="@{/saveClaseTipo3}" th:object="${clase3}" method="post">
+
+            <input type="hidden" th:field="*{id}">
+            <input type="hidden" th:field="*{especialidad}">
+
+            <label>Especialidad:</label>
+            <p th:text="*{especialidad}"></p>
+
+            <br>
+
             <label>Fecha:</label>
             <input type="datetime-local" th:field="*{fecha}" required />
 
@@ -51,7 +66,8 @@
                 <option value="">Seleccione un entrenador...</option>
                 <option th:each="e : ${entrenadores}"
                         th:value="${e.id}"
-                        th:text="${e.nombre}"></option>
+                        th:text="${e.nombre}">
+                </option>
             </select>
 
             <br><br>
@@ -60,17 +76,21 @@
             <input type="number" th:field="*{cupoMax}" />
 
             <br><br>
-            <div class="acciones">
-                <button type="submit" class="btn alta">Guardar Clase</button>
-            </div>
 
-        </div>
+            <button type="submit" class="btn alta">
+                Guardar Clase
+            </button>
 
-        <div class="acciones">
-            <br><br>
-            <a th:href="@{/clases3}" class="btn baja">Cancelar</a>
-        </div>
-    </form>
+        </form>
+    </div>
+
+    <br>
+
+    <div class="acciones">
+        <a th:href="@{/clases3}" class="btn baja">Cancelar</a>
+    </div>
+
 </div>
+
 </body>
 </html>
