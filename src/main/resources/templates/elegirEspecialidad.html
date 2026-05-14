@@ -3,16 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>Elegir Especialidad</title>
+    <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body>
-<h2>Selecciona una especialidad para tu bono</h2>
-<div th:each="esp : ${especialidades}">
-    <form th:action="@{/confirmarCompraBono}" method="post">
-        <input type="hidden" name="usuarioId" th:value="${usuarioId}">
-        <input type="hidden" name="tipo" th:value="${tipoBono}">
-        <input type="hidden" name="especialidad" th:value="${esp}">
-        <button type="submit" th:text="${esp}">Especialidad</button>
-    </form>
+
+<body class="flex-center-container">
+<div class="card-form"  >
+    <h2>Selecciona una especialidad para tu bono</h2>
+    <div th:each="esp : ${especialidades}">
+        <form th:action="@{/confirmarCompraBono}" method="post" style="text-align: center; margin-bottom: 15px;">
+            <input type="hidden" name="usuarioId" th:value="${usuarioId}">
+            <input type="hidden" name="tipo" th:value="${tipoBono}">
+            <input type="hidden" name="especialidad" th:value="${esp}">
+            <button type="submit" th:text="${esp}" class="btn clases">Especialidad</button><br>
+        </form>
+    </div>
 </div>
+
 </body>
 </html>

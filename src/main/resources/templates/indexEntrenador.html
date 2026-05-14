@@ -5,36 +5,6 @@
     <title>Panel Entrenador - DeportesUGR</title>
     <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.png}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
-    <style>
-        /* Estilos para los filtros */
-        .filters-container {
-            display: flex;
-            gap: 12px;
-            margin: 20px 0;
-        }
-        .btn-filter {
-            padding: 10px 20px;
-            border-radius: 25px;
-            border: 1px solid #ddd;
-            background: #fff;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            color: #555;
-        }
-        .btn-filter:hover { background: #f8f9fa; }
-        .btn-filter.active {
-            background-color: #6c5ce7; /* Color principal (puedes cambiarlo a var(--plum)) */
-            color: white;
-            border-color: #6c5ce7;
-            box-shadow: 0 4px 10px rgba(108, 92, 231, 0.2);
-        }
-        .hidden-row { display: none !important; }
-
-        /* Badges adicionales */
-        .badge-tipo2 { background-color: #2c3e50; color: white; }
-        .time-error { color: #e74c3c; font-size: 0.8rem; }
-    </style>
 </head>
 <body>
 
@@ -50,9 +20,20 @@
 <div class="container">
     <h3>Mis clases asignadas</h3>
 
-    <!-- BOTONES DE FILTRO -->
     <div class="filters-container">
-        <button class="btn-filter active" onclick="filterClases('all', this)">Todas las clases</button>
+        <a th:href="@{/clasesEntrenador/{id}(id=${entrenador.id}, historial=false)}"
+           class="btn-filter" th:classappend="${!mostrandoHistorial} ? 'active' : ''">
+            Próximas Clases
+        </a>
+        <a th:href="@{/clasesEntrenador/{id}(id=${entrenador.id}, historial=true)}"
+           class="btn-filter" th:classappend="${mostrandoHistorial} ? 'active' : ''">
+            Historial (Clases Pasadas)
+        </a>
+    </div>
+
+    <!-- BOTONES DE FILTRO POR TIPO (Solo se muestran si NO es historial) -->
+    <div class="filters-container" th:if="${!mostrandoHistorial && !#lists.isEmpty(clases)}">
+        <button class="btn-filter active" onclick="filterClases('all', this)">Todas</button>
         <button class="btn-filter" onclick="filterClases('tipo1-2', this)">Bonos (T1 y T2)</button>
         <button class="btn-filter" onclick="filterClases('tipo3', this)">Especiales (T3)</button>
     </div>

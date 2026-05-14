@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>DeportesUGR | API</title>
+    <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div class="header">
+    <h2><span>DeportesUGR</span> &nbsp;|&nbsp; Documentación API</h2>
+    <div class="user-info">
+        <a th:href="@{/admin}" class="btn-logout">Volver al Panel</a>
+    </div>
+</div>
+
+<!-- SECCIÓN USUARIOS -->
+<h3 class="section-title section-title-mt">Gestión de Usuarios</h3>
+<div class="table-container">
+    <table class="styled-table">
+        <thead>
+        <tr>
+            <th>Método</th>
+            <th>Endpoint</th>
+            <th>Descripción / Ejemplo Body</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><span class="badge tipo3">GET</span></td>
+            <td><code>/usuarios</code></td>
+            <td>Obtiene todos los usuarios registrados.</td>
+        </tr>
+        <tr>
+            <td><span class="badge tipo3">GET</span></td>
+            <td><code>/usuarios/{id}</code></td>
+            <td>Obtiene un usuario por su ID.</td>
+        </tr>
+        <tr>
+            <td><span class="badge tipo1">POST</span></td>
+            <td><code>/usuarios</code></td>
+            <td>
+                <div class="card-form" style="box-shadow: none; padding: 15px; max-width: 100%; border-top: none; background: var(--surface);">
+<pre style="margin:0; font-size: 0.8rem;">
+{
+  "nombre": "Ana López",
+  "email": "ana@mail.com",
+  "telefono": "600123123",
+  "password": "1234",
+  "rol": "USUARIO",
+  "especialidad": null
+}</pre>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td><span class="badge badge-partido">DELETE</span></td>
+            <td><code>/usuarios/{id}</code></td>
+            <td>Elimina un usuario por su ID único.</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- SECCIÓN CLASES -->
+<h3 class="section-title section-title-mt">Gestión de Clases</h3>
+<div class="table-container">
+    <table class="styled-table">
+        <thead>
+        <tr>
+            <th>Método</th>
+            <th>Endpoint</th>
+            <th>Descripción / Ejemplo Body</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><span class="badge tipo3">GET</span></td>
+            <td><code>/clases</code></td>
+            <td>Lista de clases disponibles.</td>
+        </tr>
+        <tr>
+            <td><span class="badge tipo3">GET</span></td>
+            <td><code>/clases/{id}</code></td>
+            <td>Obtiene una clase por su ID.</td>
+        </tr>
+        <tr>
+            <td><span class="badge tipo1">POST</span></td>
+            <td><code>/clases</code></td>
+            <td>
+                <div class="card-form" style="box-shadow: none; padding: 15px; max-width: 100%; border-top: none; background: var(--surface);">
+<pre style="margin:0; font-size: 0.8rem;">
+{
+  "tipoClase": "TIPO1",
+  "fecha": "2026-05-14T10:00:00",
+  "especialidad": "FUTBOL",
+  "entrenadorId": 1,
+  "duracionMinutos": 60,
+  "diaSemana": "LUNES",
+  "hora": "10:00:00"
+}</pre>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td><span class="badge badge-partido">DELETE</span></td>
+            <td><code>/clases/{id}</code></td>
+            <td>Elimina una clase por su ID.</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- SECCIÓN RESERVAS -->
+<h3 class="section-title section-title-mt">Gestión de Reservas</h3>
+<div class="table-container">
+    <table class="styled-table">
+        <thead>
+        <tr>
+            <th>Método</th>
+            <th>Endpoint</th>
+            <th>Descripción</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><span class="badge badge-partido">DELETE</span></td>
+            <td><code>/reservas/{id}</code></td>
+            <td>Elimina una reserva por su ID.</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- SECCIÓN BONOS -->
+<h3 class="section-title section-title-mt">Gestión de Bonos</h3>
+<div class="table-container" style="margin-bottom: 50px;">
+    <table class="styled-table">
+        <thead>
+        <tr>
+            <th>Método</th>
+            <th>Endpoint</th>
+            <th>Descripción / Ejemplo Body</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><span class="badge tipo3">GET</span></td>
+            <td><code>/bonos</code></td>
+            <td>Obtiene todos los bonos.</td>
+        </tr>
+        <tr>
+            <td><span class="badge tipo3">GET</span></td>
+            <td><code>/bonos/{id}</code></td>
+            <td>Obtiene un bono por su ID.</td>
+        </tr>
+        <tr>
+            <td><span class="badge tipo1">POST</span></td>
+            <td><code>/bonos</code></td>
+            <td>
+                <div class="card-form" style="box-shadow: none; padding: 15px; max-width: 100%; border-top: none; background: var(--surface);">
+<pre style="margin:0; font-size: 0.8rem;">
+{
+  "max_usos": 10,
+  "tipo": "MENSUAL",
+  "usuario": {
+    "id": 1
+  }
+}</pre>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td><span class="badge badge-partido">DELETE</span></td>
+            <td><code>/bonos/{id}</code></td>
+            <td>Elimina un bono por su ID.</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

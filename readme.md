@@ -76,40 +76,6 @@ DeportesUGR - API
 
 ---
 
-# Gestión de reservas
-
-## Obtener reservas
-`GET /api/reservas`
-
-## Obtener reserva por ID
-`GET /api/reservas/{id}`
-
-## Crear reserva
-`POST /api/reservas`
-
-### Body
-```json
-{
-    "estado": "PENDIENTE",
-    "usuario": {
-        "id": 1
-    },
-    "clase": {
-        "id": 10
-    },
-    "fecha": "2026-06-01"
-}
-```
-### Response
-```json
-{
-    "id": 5,
-    "estado": "PENDIENTE",
-    "nombreUsuario": "Ana López",
-    "claseId": 10,
-    "fecha": "2026-06-01"
-}
-```
 ## Eliminar reserva
 `DELETE /api/reservas/{id}`
 

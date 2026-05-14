@@ -1,6 +1,8 @@
 package com.optativaGS.deportesUGR.controladores;
 
 import com.optativaGS.deportesUGR.dto.UsuarioDTO;
+import com.optativaGS.deportesUGR.modelos.Especialidad;
+import com.optativaGS.deportesUGR.modelos.RolUsuario;
 import com.optativaGS.deportesUGR.modelos.Usuario;
 import com.optativaGS.deportesUGR.servicios.UsuarioService;
 import lombok.RequiredArgsConstructor;
@@ -34,5 +36,10 @@ public class UsuarioRestController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         usuarioService.delete(id);
+    }
+
+    @GetMapping("/api/entrenadores/{especialidad}")
+    public List<Usuario> obtenerEntrenadoresPorEspecialidad(@PathVariable Especialidad especialidad) {
+        return usuarioService.findByRolAndEspecialidad(RolUsuario.ENTRENADOR, especialidad);
     }
 }

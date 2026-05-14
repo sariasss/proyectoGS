@@ -19,35 +19,55 @@
             Formulario de Clase
         </h2>
 
-        <label>Fecha de la Clase:</label>
-        <input type="datetime-local" th:field="*{fecha}" required />
-        <br><br>
-
         <label>Especialidad de la Clase:</label>
-        <select th:field="*{especialidad}" required>
-            <option value="">Selecciona el tipo de deporte/clase</option>
+        <select name="especialidad" th:disabled="${clase3.especialidad != null}">
+            <option value="">-- Selecciona --</option>
             <option th:each="esp : ${especialidades}"
                     th:value="${esp}"
-                    th:text="${esp}"></option>
+                    th:text="${esp}"
+                    th:selected="${esp == clase3.especialidad}"></option>
         </select>
+
+        <!-- 2. CAMBIO CLAVE: Input oculto para que el valor llegue al servidor aunque el select esté disabled -->
+        <input type="hidden" th:if="${clase3.especialidad != null}"
+               th:field="*{especialidad}" />
+
         <br><br>
 
-        <label>Cupo Máximo de Personas:</label>
-        <input type="number" th:field="*{cupoMax}" min="1" required />
-        <br><br>
+        <!-- 3. Solo mostramos el botón de filtrar si NO se ha elegido especialidad aún -->
+        <button type="submit" th:if="${clase3.especialidad == null}"
+                th:formmethod="get" th:formaction="@{/newClaseTipo3}" class="btn alta">
+            Ver entrenadores disponibles
+        </button>
 
-        <label>Entrenador Responsable:</label>
-        <select th:field="*{entrenador}" required>
-            <option value="">Seleccione un entrenador...</option>
-            <option th:each="e : ${entrenadores}"
-                    th:value="${e.id}"
-                    th:text="${e.nombre}"></option>
-        </select>
-        <br><br>
+        <div th:if="${clase3.especialidad != null}">
+            <label>Fecha:</label>
+            <input type="datetime-local" th:field="*{fecha}" required />
+
+            <br><br>
+
+            <label>Entrenador Responsable:</label>
+            <select th:field="*{entrenador}" required>
+                <option value="">Seleccione un entrenador...</option>
+                <option th:each="e : ${entrenadores}"
+                        th:value="${e.id}"
+                        th:text="${e.nombre}"></option>
+            </select>
+
+            <br><br>
+
+            <label>Cupo:</label>
+            <input type="number" th:field="*{cupoMax}" />
+
+            <br><br>
+            <div class="acciones">
+                <button type="submit" class="btn alta">Guardar Clase</button>
+            </div>
+
+        </div>
 
         <div class="acciones">
-            <button type="submit" class="btn alta">Guardar</button>
-            <!-- CAMBIO CLAVE 2: Redirigir al listado de clases al cancelar -->
+            <br><br>
             <a th:href="@{/clases3}" class="btn baja">Cancelar</a>
         </div>
     </form>

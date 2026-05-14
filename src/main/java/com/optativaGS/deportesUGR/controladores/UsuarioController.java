@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -117,12 +118,20 @@ public class UsuarioController {
 
     //Formulario para crear una nueva clase de tipo 3 (solo para admin)
     @GetMapping("/newClaseTipo3")
-    public String nuevaClaseTipo3Form(Model model) {
-        model.addAttribute("clase3", new ClaseTipo3());
-        model.addAttribute("entrenadores", usuarioService.findEntrenadores());
+    public String nuevaClaseTipo3Form(@RequestParam(required = false) Especialidad especialidad, Model model) {
+        ClaseTipo3 clase = new ClaseTipo3();
+        if (especialidad != null) {
+            clase.setEspecialidad(especialidad);
+            model.addAttribute("entrenadores", usuarioService.findByRolAndEspecialidad(RolUsuario.ENTRENADOR, especialidad));
+        } else {
+            model.addAttribute("entrenadores", new ArrayList<>());
+        }
+
+        model.addAttribute("clase3", clase);
         model.addAttribute("especialidades", Especialidad.values());
         return "formularioAltaClase3";
     }
+
 
     //Recoge la información del save clase tipo 3 y la guarda en la base de datos
     @PostMapping("/saveClaseTipo3")
@@ -168,12 +177,14 @@ public class UsuarioController {
 
     //Muestra la pantalla del entrenador
     @GetMapping("/clasesEntrenador/{id}")
-    public String mostrarPanelEntrenador(@PathVariable Long id, Model model) {
+    public String mostrarPanelEntrenador(@PathVariable Long id, @RequestParam(required = false, defaultValue = "false") boolean historial, Model model) {
         UsuarioDTO entrenador = usuarioService.findById(id);
 
         if (entrenador == null || entrenador.rol() != RolUsuario.ENTRENADOR) {
             return "redirect:/login";
         }
+
+        LocalDateTime ahora = LocalDateTime.now();
 
         List<Clase> clasesAsignadas = claseService.findAll().stream()
                 .filter(c -> c.getEspecialidad() != null && c.getEspecialidad().equals(entrenador.especialidad()))
@@ -183,11 +194,20 @@ public class UsuarioController {
                     }
                     return true;
                 })
+                // --- FILTRO DE FECHA ---
+                .filter(c -> {
+                    if (historial) {
+                        return c.getFecha().isBefore(ahora);
+                    } else {
+                        return c.getFecha().isAfter(ahora);
+                    }
+                })
                 .sorted(Comparator.comparing(Clase::getFecha))
                 .toList();
 
         model.addAttribute("entrenador", entrenador);
         model.addAttribute("clases", clasesAsignadas);
+        model.addAttribute("mostrandoHistorial", historial); // Para saber qué botón resaltar
 
         return "indexEntrenador";
     }
@@ -298,5 +318,10 @@ public class UsuarioController {
         } catch (Exception e) {
         }
         return "redirect:/indexUsuario/" + usuarioId;
+    }
+
+    @GetMapping("/api-docs")
+    public String api() {
+        return "api-docs";
     }
 }

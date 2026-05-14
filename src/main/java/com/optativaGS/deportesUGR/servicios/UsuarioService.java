@@ -235,4 +235,8 @@ public class UsuarioService {
     public void solicitarCambio(Long usoId) {
         UsoBono uso = usoBonoRepository.findById(usoId).orElseThrow();
     }
+
+    public List<Usuario> findByRolAndEspecialidad(RolUsuario rol, Especialidad especialidad) {
+        return usuarioRepository.findByRolAndEspecialidad(rol, especialidad);
+    }
 }

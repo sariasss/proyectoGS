@@ -5,150 +5,139 @@
     <title>Panel de Usuario - DeportesUGR</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root { --ugr-red: #a93226; --ugr-dark: #2c3e50; }
-        body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
-        .navbar-custom { background-color: var(--ugr-red); color: white; }
-        .card-bono { border: none; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .card-especial { border: none; border-radius: 15px; background: linear-gradient(145deg, #ffffff, #fff9e6); border-left: 5px solid #ffc107; }
-        .session-item { border-radius: 8px; margin-bottom: 8px; transition: 0.2s; border: 1px solid #eee; }
-        .session-item:hover { background-color: #fff5f5; }
-        .btn-ugr { background-color: var(--ugr-red); color: white; border-radius: 20px; }
-        .btn-ugr:hover { background-color: #8e2a20; color: white; }
-        .badge-count { font-size: 0.9rem; padding: 0.5em 1em; }
-        .text-locked { color: #adb5bd; }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-custom shadow-sm mb-4">
-    <div class="container">
-        <a class="navbar-brand text-white fw-bold" href="#"><i class="fas fa-university me-2"></i>DeportesUGR</a>
-        <div class="d-flex align-items-center">
-            <span class="text-white me-3">Bienvenido, <strong th:text="${usuario.nombre}">Usuario</strong></span>
-            <button class="btn btn-light btn-sm rounded-pill fw-bold text-danger" data-bs-toggle="modal" data-bs-target="#modalCompra">
-                <i class="fas fa-shopping-cart me-1"></i>Nuevo Bono
-            </button>
-            <a th:href="@{/logout}" class="text-white ms-3" title="Cerrar sesión">
-                <i class="fas fa-sign-out-alt fa-lg"></i>
-            </a>
-        </div>
+<!-- HEADER COMÚN -->
+<div class="header">
+    <h2><span>DeportesUGR</span> &nbsp;|&nbsp; Panel Usuario</h2>
+    <div class="user-info">
+        <span>Bienvenido, <strong th:text="${usuario.nombre}">Usuario</strong></span>
+        <button class="btn-logout btn-nuevo-bono"
+                data-bs-toggle="modal" data-bs-target="#modalCompra">
+            <i class="fas fa-plus-circle"></i> Nuevo Bono
+        </button>
+        <a th:href="@{/logout}" class="btn-logout">Cerrar sesión</a>
     </div>
-</nav>
+</div>
 
 <div class="container">
 
-    <!-- SECCIÓN DE BONOS -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <h3 class="fw-bold"><i class="fas fa-ticket-alt me-2 text-danger"></i>Mis Bonos</h3>
-            <p class="text-muted small">Las sesiones son consecutivas. Los bonos antiguos se bloquean al adquirir uno nuevo de la misma especialidad.</p>
-            <hr class="w-25">
-        </div>
-    </div>
+    <!-- SECCIÓN BONOS -->
+    <h3 class="section-title">
+        <i class="fas fa-ticket-alt"></i>Mis Bonos
+    </h3>
+    <p class="section-subtitle">Las sesiones son consecutivas. Los bonos antiguos se bloquean al adquirir uno nuevo de la misma especialidad.</p>
 
     <div class="row">
-        <!-- Si no tiene bonos -->
-        <div th:if="${!tieneBonos}" class="col-12 text-center py-5 bg-white rounded-4 shadow-sm mb-5">
-            <i class="fas fa-info-circle fa-3x text-light mb-3"></i>
-            <p class="text-muted">No tienes bonos activos actualmente.</p>
-            <button class="btn btn-ugr px-4" data-bs-toggle="modal" data-bs-target="#modalCompra">Comprar mi primer bono</button>
+
+        <!-- Sin bonos -->
+        <div th:if="${!tieneBonos}" class="col-12 empty-state">
+            <i class="fas fa-info-circle fa-3x empty-icon"></i>
+            <p>No tienes bonos activos actualmente.</p>
+            <button class="btn alta" data-bs-toggle="modal" data-bs-target="#modalCompra">
+                Comprar mi primer bono
+            </button>
         </div>
 
-        <!-- Tarjetas de Bono -->
+        <!-- Tarjetas de bono -->
         <div th:each="b : ${misBonos}" class="col-lg-6 mb-4">
-            <div class="card card-bono h-100">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="card-bono">
+                <div class="card-bono-header">
+                    <div>
+                        <h4 class="bono-especialidad" th:text="${b.especialidad}">Especialidad</h4>
+                        <span class="badge badge-tipo-bono" th:text="${b.tipo}">Tipo</span>
+                    </div>
+                    <span class="badge-usos" th:text="${b.usos.size() + ' / ' + b.max_usos}">0 / 10</span>
+                </div>
+
+                <h6 class="sesiones-label">Sesiones Programadas</h6>
+
+                <div class="list-group list-group-flush">
+
+                    <div th:each="uso : ${b.usos}"
+                         class="list-group-item session-item d-flex justify-content-between align-items-center"
+                         th:classappend="${mapaBloqueo.get(b.id)} ? 'session-locked' : ''">
+
                         <div>
-                            <h4 class="fw-bold mb-0 text-dark" th:text="${b.especialidad}">Especialidad</h4>
-                            <span class="badge bg-light text-muted border mt-1" th:text="${b.tipo}">Tipo</span>
+                            <i class="far fa-calendar-check me-2"
+                               th:classappend="${mapaBloqueo.get(b.id)} ? 'icon-muted' : 'icon-success'"></i>
+                            <span class="fw-medium" th:text="${#temporals.format(uso.fecha, 'dd/MM/yyyy')}">Fecha</span>
                         </div>
-                        <span class="badge bg-danger rounded-pill badge-count" th:text="${b.usos.size() + ' / ' + b.max_usos}">0 / 10</span>
+
+                        <!-- Bono bloqueado -->
+                        <div th:if="${mapaBloqueo.get(b.id)}" class="lock-icon" title="Bono consolidado (no editable)">
+                            <i class="fas fa-lock"></i>
+                        </div>
+
+                        <!-- Cancelar sesión -->
+                        <form th:unless="${mapaBloqueo.get(b.id)}"
+                              th:action="@{/uso/cancelar/{id}(id=${uso.id})}" method="post"
+                              onsubmit="return confirm('¿Estás seguro de que quieres cancelar esta sesión?');">
+                            <input type="hidden" name="usuarioId" th:value="${usuario.id}">
+                            <button type="submit" class="btn-cancelar-sesion">
+                                <i class="fas fa-times-circle fa-lg"></i>
+                            </button>
+                        </form>
                     </div>
 
-                    <h6 class="small fw-bold text-uppercase text-muted border-bottom pb-2 mb-3">Sesiones Programadas</h6>
-                    <div class="list-group list-group-flush">
-
-                        <div th:each="uso : ${b.usos}" class="list-group-item session-item d-flex justify-content-between align-items-center bg-white">
-                            <div th:classappend="${mapaBloqueo.get(b.id)} ? 'text-locked' : ''">
-                                <i class="far fa-calendar-check me-2" th:classappend="${mapaBloqueo.get(b.id)} ? 'text-muted' : 'text-success'"></i>
-                                <span class="fw-medium" th:text="${#temporals.format(uso.fecha, 'dd/MM/yyyy')}">Fecha</span>
-                            </div>
-
-                            <!-- LÓGICA DE BLOQUEO: Si el bono tiene sucesores, mostramos candado. Si no, la X de cancelar -->
-                            <div th:if="${mapaBloqueo.get(b.id)}" class="text-muted" title="Bono consolidado (no editable)">
-                                <i class="fas fa-lock"></i>
-                            </div>
-
-                            <form th:unless="${mapaBloqueo.get(b.id)}"
-                                  th:action="@{/uso/cancelar/{id}(id=${uso.id})}" method="post"
-                                  onsubmit="return confirm('¿Estás seguro de que quieres cancelar esta sesión?');">
-                                <input type="hidden" name="usuarioId" th:value="${usuario.id}">
-                                <button type="submit" class="btn btn-sm text-danger border-0">
-                                    <i class="fas fa-times-circle fa-lg"></i>
-                                </button>
-                            </form>
-                        </div>
-
-                        <div th:if="${#lists.isEmpty(b.usos)}" class="text-center py-2">
-                            <small class="text-muted">No hay sesiones pendientes.</small>
-                        </div>
+                    <div th:if="${#lists.isEmpty(b.usos)}" class="sesiones-vacias">
+                        <small>No hay sesiones pendientes.</small>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- SECCIÓN CLASES ESPECIALES TIPO 3 -->
-    <div class="row mt-5 mb-4">
-        <div class="col-12">
-            <h3 class="fw-bold"><i class="fas fa-star me-2 text-warning"></i>Eventos Especiales</h3>
-            <p class="text-muted">Acceso gratuito incluido con cualquier bono activo.</p>
-        </div>
-    </div>
+    <!-- SECCIÓN EVENTOS ESPECIALES -->
+    <h3 class="section-title section-title-mt">
+        <i class="fas fa-star section-icon-gold"></i>Eventos Especiales
+    </h3>
+    <p class="section-subtitle">Acceso gratuito incluido con cualquier bono activo.</p>
 
     <div class="row pb-5">
         <div th:each="ce : ${clasesEspeciales}" class="col-md-4 mb-4">
-            <div class="card card-especial shadow-sm h-100">
-                <div class="card-body p-4">
-                    <span class="badge bg-warning text-dark mb-2">ESPECIAL TIPO 3</span>
-                    <h5 class="fw-bold text-dark" th:text="${ce.especialidad}">Nombre Clase</h5>
-                    <p class="small text-muted mb-4">
-                        <i class="far fa-calendar-alt me-1"></i> <span th:text="${#temporals.format(ce.fecha, 'dd/MM/yyyy HH:mm')}">Fecha</span><br>
-                        <i class="far fa-clock me-1"></i> Duración: <span th:text="${ce.duracionMinutos}">60</span> min
-                    </p>
+            <div class="card-especial">
+                <span class="badge badge-especial">ESPECIAL TIPO 3</span>
+                <h5 class="especial-nombre" th:text="${ce.especialidad}">Nombre Clase</h5>
+                <p class="especial-info">
+                    <i class="far fa-calendar-alt me-1"></i>
+                    <span th:text="${#temporals.format(ce.fecha, 'dd/MM/yyyy HH:mm')}">Fecha</span><br>
+                    <i class="far fa-clock me-1"></i>
+                    Duración: <span th:text="${ce.duracionMinutos}">60</span> min
+                </p>
 
-                    <form th:action="@{/clase/inscribir-especial/{claseId}(claseId=${ce.id})}" method="post">
-                        <input type="hidden" name="usuarioId" th:value="${usuario.id}">
-                        <button th:if="${tieneBonos}" type="submit" class="btn btn-dark w-100 rounded-pill shadow-sm">
-                            Inscribirse Gratis
-                        </button>
-                        <button th:unless="${tieneBonos}" type="button" class="btn btn-light w-100 rounded-pill text-muted border" disabled>
-                            <i class="fas fa-lock me-2"></i>Requiere Bono
-                        </button>
-                    </form>
-                </div>
+                <form th:action="@{/clase/inscribir-especial/{claseId}(claseId=${ce.id})}" method="post">
+                    <input type="hidden" name="usuarioId" th:value="${usuario.id}">
+                    <button th:if="${tieneBonos}" type="submit" class="btn-inscribir">
+                        Inscribirse Gratis
+                    </button>
+                    <button th:unless="${tieneBonos}" type="button" class="btn-inscribir btn-inscribir-disabled" disabled>
+                        <i class="fas fa-lock me-2"></i>Requiere Bono
+                    </button>
+                </form>
             </div>
         </div>
     </div>
+
 </div>
 
 <!-- MODAL COMPRA -->
 <div class="modal fade" id="modalCompra" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
+        <div class="modal-content modal-compra-content">
             <div class="modal-header border-0 pb-0">
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body p-5 text-center">
-                <i class="fas fa-ticket-alt fa-3x text-danger mb-3"></i>
-                <h4 class="fw-bold mb-4">¿Qué bono prefieres?</h4>
+            <div class="modal-compra-body">
+                <i class="fas fa-ticket-alt fa-3x modal-icon-ticket"></i>
+                <h4 class="modal-title-compra">¿Qué bono prefieres?</h4>
                 <div class="d-grid gap-3">
-                    <a th:href="@{/elegirEspecialidad/{id}/TIPO1(id=${usuario.id})}" class="btn btn-outline-danger py-3 fw-bold rounded-pill">
+                    <a th:href="@{/elegirEspecialidad/{id}/TIPO1(id=${usuario.id})}" class="btn-bono btn-bono-grupal">
                         Bono Grupal (10 clases)
                     </a>
-                    <a th:href="@{/elegirEspecialidad/{id}/TIPO2(id=${usuario.id})}" class="btn btn-outline-dark py-3 fw-bold rounded-pill">
+                    <a th:href="@{/elegirEspecialidad/{id}/TIPO2(id=${usuario.id})}" class="btn-bono btn-bono-individual">
                         Bono Individual (5 clases)
                     </a>
                 </div>
