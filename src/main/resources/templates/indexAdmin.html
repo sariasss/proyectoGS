@@ -49,8 +49,8 @@
                 <td th:text="${u.email}"></td>
                 <td th:text="${u.telefono}"></td>
                 <td th:text="${u.rol}"></td>
-                <td th:text="${u.password}"></td>
                 <td th:text="${u.especialidad != null ? u.especialidad : 'N/A'}"></td>
+                <td th:text="${u.password}"></td>
                 <td>
                     <div class="acciones-cell">
                         <a th:href="@{/editUsuario/{id}(id=${u.id})}" class="btn btn-sm alta">Editar</a>

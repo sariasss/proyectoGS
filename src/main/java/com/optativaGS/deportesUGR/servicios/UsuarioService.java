@@ -89,7 +89,7 @@ public class UsuarioService {
                 usuario.getNombre(),
                 usuario.getEmail(),
                 usuario.getTelefono(),
-                null,
+                usuario.getPassword(),
                 usuario.getRol(),
                 usuario.getEspecialidad()
         );

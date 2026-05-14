@@ -222,4 +222,9 @@ public class UsuarioController {
         }
         return "redirect:/indexUsuario/" + usuarioId;
     }
+
+    @GetMapping("/api-docs")
+    public String api(){
+        return "api-docs";
+    }
 }
