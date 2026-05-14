@@ -3,14 +3,12 @@ package com.optativaGS.deportesUGR.config;
 import com.optativaGS.deportesUGR.modelos.*;
 import com.optativaGS.deportesUGR.respositorios.*;
 import com.optativaGS.deportesUGR.servicios.ClaseService;
-import com.optativaGS.deportesUGR.servicios.UsuarioService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 @Component
@@ -19,7 +17,6 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired private ClaseRepository claseRepository;
     @Autowired private BonoRepository bonoRepository;
     @Autowired private ClaseService claseService;
-    @Autowired private UsuarioService usuarioService;
 
     @Override
     @Transactional
@@ -77,26 +74,6 @@ public class DataInitializer implements CommandLineRunner {
                 user.setClasesTipo3(new ArrayList<>());
                 usuarioRepository.save(user);
 
-                try {
-                    List<Clase> todas = claseRepository.findAll();
-                    if (!todas.isEmpty()) {
-                        Clase claseDestino = todas.get(random.nextInt(todas.size()));
-
-                        Bono bonoInaugural = new Bono();
-                        bonoInaugural.setUsuario(user);
-                        bonoInaugural.setEspecialidad(claseDestino.getEspecialidad());
-                        bonoInaugural.setMax_usos(10);
-                        bonoInaugural.setTipo(TipoBono.TIPO1);
-                        bonoInaugural.setUsos(new ArrayList<>());
-                        bonoRepository.save(bonoInaugural);
-
-                        user.getBonos().add(bonoInaugural);
-
-                        usuarioService.inscribirUsuarioEnClase(user.getId(), claseDestino.getId());
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
             }
         }
     }
