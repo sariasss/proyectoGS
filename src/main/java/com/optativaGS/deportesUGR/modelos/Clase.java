@@ -28,9 +28,6 @@ public abstract class Clase {
     @JoinColumn(name = "entrenador_id")
     private Usuario entrenador;
 
-    @OneToMany(mappedBy = "clase", cascade = CascadeType.ALL)
-    private List<Reserva> reservas;
-
     private Integer duracionMinutos;
 
 }

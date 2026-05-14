@@ -20,6 +20,7 @@
 <div class="container">
     <h3>Mis clases asignadas</h3>
 
+    <!-- BOTONES DE FILTRO -->
     <div class="filters-container">
         <a th:href="@{/clasesEntrenador/{id}(id=${entrenador.id}, historial=false)}"
            class="btn-filter" th:classappend="${!mostrandoHistorial} ? 'active' : ''">
@@ -50,32 +51,24 @@
             </tr>
             </thead>
             <tbody id="tableBody">
-            <!-- Cada fila tiene una clase dinámica según su tipo para el filtro JS -->
             <tr th:each="c : ${clases}"
                 th:class="${c instanceof T(com.optativaGS.deportesUGR.modelos.ClaseTipo3)} ? 'row-tipo3' : 'row-tipo1-2'">
 
-                <!-- Día de la semana y fecha -->
                 <td>
                     <span class="day-text" th:text="${c.fecha != null ? #temporals.format(c.fecha, 'EEEE') : '---'}">Lunes</span>
                     <small th:text="${c.fecha != null ? #temporals.format(c.fecha, 'dd/MM/yyyy') : '--/--/--'}">01/01/2026</small>
                 </td>
 
-                <!-- Horario calculado (Protección contra nulos en duracionMinutos) -->
                 <td>
                     <span class="time-box">
                         <span th:text="${c.fecha != null ? #temporals.format(c.fecha, 'HH:mm') : '--:--'}">17:00</span>
                         &ndash;
                         <span th:text="${c.fecha != null ? #temporals.format(c.fecha.plusMinutes(c.duracionMinutos ?: 0), 'HH:mm') : '--:--'}">18:00</span>
                     </span>
-                    <span class="duration-text">
-                        <i th:text="${(c.duracionMinutos ?: 0)} + ' min de sesión'">60 min</i>
-                    </span>
                 </td>
 
-                <!-- Especialidad -->
-                <td style="font-weight: 600; color: var(--plum, #6c5ce7);" th:text="${c.especialidad}">Fútbol</td>
+                <td style="font-weight: 600; color: #6c5ce7;" th:text="${c.especialidad}">Fútbol</td>
 
-                <!-- Tipo de clase con badges -->
                 <td>
                     <span th:if="${c instanceof T(com.optativaGS.deportesUGR.modelos.ClaseTipo1)}"
                           class="badge tipo1">📅 Entrenamiento Grupal</span>
@@ -85,46 +78,33 @@
 
                     <span th:if="${c instanceof T(com.optativaGS.deportesUGR.modelos.ClaseTipo3)}"
                           class="badge tipo3">📌 Evento Puntual</span>
-
-                    <div th:if="${c.duracionMinutos == 120}">
-                        <span class="badge badge-partido">🏆 Partido mensual</span>
-                    </div>
                 </td>
 
-                <!-- Cupo / Inscritos -->
                 <td>
                     <div th:if="${c instanceof T(com.optativaGS.deportesUGR.modelos.ClaseTipo3)}">
                         <span class="inscritos-count" th:text="${#lists.size(c.inscripciones)}">0</span>
-                        <span style="color: var(--text-faint); font-size: 0.85rem;">/</span>
+                        <span style="color: #999;">/</span>
                         <span th:text="${c.cupoMax}">20</span>
                     </div>
                     <div th:unless="${c instanceof T(com.optativaGS.deportesUGR.modelos.ClaseTipo3)}">
-                        <span th:if="${c instanceof T(com.optativaGS.deportesUGR.modelos.ClaseTipo2)}"
-                              style="color: var(--text-faint); font-size: 0.82rem;">Personal</span>
-                        <span th:if="${c instanceof T(com.optativaGS.deportesUGR.modelos.ClaseTipo1)}"
-                              style="color: var(--text-faint); font-size: 0.82rem;">Grupo</span>
+                        <small style="color: #999;">Sesión de Bono</small>
                     </div>
                 </td>
-
             </tr>
             </tbody>
         </table>
     </div>
 
-    <div th:if="${#lists.isEmpty(clases)}" class="no-clases">
-        <img src="https://cdn-icons-png.flaticon.com/512/4076/4076402.png" width="72" style="opacity: 0.25; margin-bottom: 16px;">
-        <p>No tienes clases asignadas que coincidan con tu especialidad.</p>
+    <div th:if="${#lists.isEmpty(clases)}" class="no-clases" style="text-align: center; padding: 50px;">
+        <p>No tienes clases asignadas actualmente.</p>
     </div>
 </div>
 
-<!-- SCRIPT DE FILTRADO -->
 <script>
     function filterClases(tipo, btn) {
-        // Actualizar botones
         document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
 
-        // Seleccionar filas
         const rowsT12 = document.querySelectorAll('.row-tipo1-2');
         const rowsT3 = document.querySelectorAll('.row-tipo3');
 

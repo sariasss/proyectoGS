@@ -2,6 +2,7 @@ package com.optativaGS.deportesUGR.servicios;
 
 import com.optativaGS.deportesUGR.modelos.*;
 import com.optativaGS.deportesUGR.respositorios.ClaseRepository;
+import com.optativaGS.deportesUGR.respositorios.UsoBonoRepository;
 import com.optativaGS.deportesUGR.respositorios.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import java.util.Map;
 public class ClaseService {
     private final ClaseRepository claseRepository;
     private final UsuarioRepository usuarioRepository;
+    private final UsoBonoRepository usoBonoRepository;
 
     public List<Clase> findAll(){
         return claseRepository.findAll();
@@ -159,8 +161,6 @@ public class ClaseService {
 
     public List<ClaseTipo3> findAllTipo3() {
         List<ClaseTipo3> lista = claseRepository.findAllTipo3();
-        // Debug opcional: imprime las clases para ver si alguna es Tipo1
-        // lista.forEach(c -> System.out.println(c.getClass().getSimpleName()));
         return lista;
     }
 
@@ -175,5 +175,11 @@ public class ClaseService {
         if ((mes == 3 && dia >= 29) || (mes == 4 && dia <= 5)) return false;
 
         return true;
+    }
+
+    public List<UsoBono> findSolicitudesPendientes() {
+        return usoBonoRepository.findAll().stream()
+                .filter(u -> u.getEstadoSolicitud() == EstadoSolicitud.PENDIENTE)
+                .toList();
     }
 }

@@ -19,6 +19,11 @@ public class UsoBono {
 
     private LocalDate fecha;
 
+    private LocalDate fechaPropuesta;
+
+    @Enumerated(EnumType.STRING)
+    private EstadoSolicitud estadoSolicitud = EstadoSolicitud.SIN_SOLICITUD;
+
     @ManyToOne
     @JoinColumn(name = "bono_id")
     private Bono bono;

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -82,6 +83,13 @@ public class UsuarioController {
         model.addAttribute("especialidades", Especialidad.values());
 
         return "formularioAltaEntrenador";
+    }
+
+    //Elimina un usuario
+    @GetMapping("/delUsuario/{id}")
+    public String eliminarUsuario(@PathVariable Long id){
+        usuarioService.delete(id);
+        return "redirect:/admin";
     }
 
     //Recoge la información del save usuario y la guarda en la base de datos
@@ -161,13 +169,6 @@ public class UsuarioController {
         return "redirect:/clases3";
     }
 
-    //Elimina un usuario
-    @GetMapping("/delUsuario/{id}")
-    public String eliminarUsuario(@PathVariable Long id){
-        usuarioService.delete(id);
-        return "redirect:/admin";
-    }
-
     //Devuelve una lista de clases
     @GetMapping("/clases")
     public String listarClases3(Model model){
@@ -205,9 +206,14 @@ public class UsuarioController {
                 .sorted(Comparator.comparing(Clase::getFecha))
                 .toList();
 
+        List<UsoBono> solicitudesPendientes = claseService.findSolicitudesPendientes().stream()
+                .filter(u -> u.getBono().getEspecialidad().equals(entrenador.especialidad()))
+                .toList();
+
         model.addAttribute("entrenador", entrenador);
         model.addAttribute("clases", clasesAsignadas);
         model.addAttribute("mostrandoHistorial", historial); // Para saber qué botón resaltar
+        model.addAttribute("solicitudes", solicitudesPendientes);
 
         return "indexEntrenador";
     }
@@ -270,45 +276,6 @@ public class UsuarioController {
         model.addAttribute("tieneBonos", !misBonos.isEmpty());
 
         return "indexUsuario";
-    }
-
-    @PostMapping("/comprarBono/{id}")
-    public String comprarBono(@PathVariable Long id, @RequestParam TipoBono tipo) {
-        usuarioService.comprarBono(id, tipo);
-
-        return "redirect:/indexUsuario/" + id;
-    }
-
-    //Pantalla intermedia para elegir especialidad del bono
-    @GetMapping("/elegirEspecialidad/{usuarioId}/{tipo}")
-    public String elegirEspecialidad(@PathVariable Long usuarioId, @PathVariable TipoBono tipo, Model model) {
-        model.addAttribute("usuarioId", usuarioId);
-        model.addAttribute("tipoBono", tipo);
-        model.addAttribute("especialidades", Especialidad.values());
-        return "elegirEspecialidad";
-    }
-
-    @PostMapping("/confirmarCompraBono")
-    public String confirmarCompraBono(
-            @RequestParam Long usuarioId,
-            @RequestParam TipoBono tipo,
-            @RequestParam Especialidad especialidad) {
-
-        usuarioService.comprarBonoConEspecialidad(usuarioId, tipo, especialidad);
-
-        return "redirect:/indexUsuario/" + usuarioId;
-    }
-
-    @PostMapping("/uso/cancelar/{id}")
-    public String cancelarUso(@PathVariable Long id, @RequestParam Long usuarioId) {
-        usuarioService.cancelarYReasignar(id);
-        return "redirect:/indexUsuario/" + usuarioId;
-    }
-
-    @PostMapping("/uso/solicitar-cambio/{id}")
-    public String solicitarCambio(@PathVariable Long id, @RequestParam Long usuarioId) {
-        usuarioService.solicitarCambio(id);
-        return "redirect:/indexUsuario/" + usuarioId;
     }
 
     @PostMapping("/clase/inscribir-especial/{claseId}")
