@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -125,12 +126,14 @@ public class UsuarioController {
 
     //Muestra la pantalla del entrenador
     @GetMapping("/clasesEntrenador/{id}")
-    public String mostrarPanelEntrenador(@PathVariable Long id, Model model) {
+    public String mostrarPanelEntrenador(@PathVariable Long id, @RequestParam(required = false, defaultValue = "false") boolean historial, Model model) {
         UsuarioDTO entrenador = usuarioService.findById(id);
 
         if (entrenador == null || entrenador.rol() != RolUsuario.ENTRENADOR) {
             return "redirect:/login";
         }
+
+        LocalDateTime ahora = LocalDateTime.now();
 
         List<Clase> clasesAsignadas = claseService.findAll().stream()
                 .filter(c -> c.getEspecialidad() != null && c.getEspecialidad().equals(entrenador.especialidad()))
@@ -139,6 +142,13 @@ public class UsuarioController {
                         return c3.getEntrenador() != null && c3.getEntrenador().getId().equals(id);
                     }
                     return true;
+                })
+                .filter(c -> {
+                    if (historial) {
+                        return c.getFecha().isBefore(ahora);
+                    } else {
+                        return c.getFecha().isAfter(ahora);
+                    }
                 })
                 .sorted(Comparator.comparing(Clase::getFecha))
                 .toList();
@@ -149,6 +159,7 @@ public class UsuarioController {
 
         model.addAttribute("entrenador", entrenador);
         model.addAttribute("clases", clasesAsignadas);
+        model.addAttribute("mostrandoHistorial", historial);
         model.addAttribute("solicitudes", solicitudesPendientes);
 
         return "indexEntrenador";
