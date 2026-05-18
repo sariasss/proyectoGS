@@ -19,6 +19,81 @@
 
 <div class="container">
     <h3>Mis clases asignadas</h3>
+    <!-- SOLICITUDES DE CAMBIO -->
+    <div class="solicitudes-container"
+         th:if="${!#lists.isEmpty(solicitudes)}">
+
+        <h3 style="margin-top:30px;">
+            Solicitudes de cambio de clase
+        </h3>
+
+        <div th:each="uso : ${solicitudes}"
+             class="card-solicitud">
+
+            <div class="solicitud-info">
+
+                <p>
+                    <strong>Usuario:</strong>
+
+                    <span th:text="${uso.bono.usuario.nombre}">
+                    Usuario
+                </span>
+                </p>
+
+                <p>
+                    <strong>Fecha actual:</strong>
+
+                    <span th:text="${#temporals.format(uso.fecha, 'dd/MM/yyyy')}">
+                    01/01/2026
+                </span>
+                </p>
+
+                <p>
+                    <strong>Nueva fecha solicitada:</strong>
+
+                    <span th:text="${#temporals.format(uso.fechaPropuesta, 'dd/MM/yyyy')}">
+                    05/01/2026
+                </span>
+                </p>
+
+            </div>
+
+            <div class="solicitud-actions">
+
+                <!-- ACEPTAR -->
+                <form th:action="@{/solicitud/aceptar/{id}(id=${uso.id})}"
+                      method="post">
+
+                    <input type="hidden"
+                           name="entrenadorId"
+                           th:value="${entrenador.id}">
+
+                    <button type="submit"
+                            class="btn-aceptar">
+
+                        Aceptar
+                    </button>
+                </form>
+
+                <!-- RECHAZAR -->
+                <form th:action="@{/solicitud/rechazar/{id}(id=${uso.id})}"
+                      method="post">
+
+                    <input type="hidden"
+                           name="entrenadorId"
+                           th:value="${entrenador.id}">
+
+                    <button type="submit"
+                            class="btn-rechazar">
+
+                        Rechazar
+                    </button>
+                </form>
+
+            </div>
+
+        </div>
+    </div>
 
     <!-- BOTONES DE FILTRO -->
     <div class="filters-container" th:if="${!(mostrandoHistorial ?: false) && !#lists.isEmpty(clases)}">

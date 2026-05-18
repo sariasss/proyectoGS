@@ -4,7 +4,38 @@
     <meta charset="UTF-8">
     <title>Panel de Usuario - DeportesUGR</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Iconos FontAwesome para el sobre de solicitud y la X de cancelación -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* Ajustes estéticos para la nueva funcionalidad */
+        .btn-solicitar-tipo2 {
+            background: #0d6efd;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .btn-solicitar-tipo2:hover {
+            background: #0a58ca;
+            color: white;
+            transform: translateY(-1px);
+        }
+        .badge-estado {
+            font-size: 0.7rem;
+            padding: 4px 8px;
+            border-radius: 10px;
+            margin-right: 8px;
+            text-transform: uppercase;
+        }
+        .session-item { border-left: 4px solid transparent; transition: all 0.2s; }
+        .session-item:hover { background-color: #f8f9fa; border-left-color: #0d6efd; }
+        .session-locked { opacity: 0.7; background-color: #f1f1f1; cursor: not-allowed; }
+        .empty-sessions-msg { padding: 2rem; color: #6c757d; font-style: italic; }
+    </style>
 </head>
 <body>
 
@@ -25,13 +56,13 @@
 
     <!-- SECCIÓN BONOS -->
     <h3 class="section-title">
-        <i class="fas fa-ticket-alt"></i>Mis Bonos
+        <i class="fas fa-ticket-alt"></i> Mis Bonos
     </h3>
-    <p class="section-subtitle">Las sesiones son consecutivas. Los bonos antiguos se bloquean al adquirir uno nuevo de la misma especialidad.</p>
+    <p class="section-subtitle">Gestiona tus clases grupales e individuales. Las sesiones son consecutivas según la especialidad.</p>
 
     <div class="row">
 
-        <!-- Sin bonos -->
+        <!-- Estado cuando no hay ningún bono comprado -->
         <div th:if="${!tieneBonos}" class="col-12 empty-state">
             <i class="fas fa-info-circle fa-3x empty-icon"></i>
             <p>No tienes bonos activos actualmente.</p>
@@ -40,49 +71,122 @@
             </button>
         </div>
 
-        <!-- Tarjetas de bono -->
+        <!-- Tarjetas de bono (Iteración sobre la lista de bonos del usuario) -->
         <div th:each="b : ${misBonos}" class="col-lg-6 mb-4">
-            <div class="card-bono">
+            <div class="card-bono shadow-sm">
                 <div class="card-bono-header">
                     <div>
                         <h4 class="bono-especialidad" th:text="${b.especialidad}">Especialidad</h4>
-                        <span class="badge badge-tipo-bono" th:text="${b.tipo}">Tipo</span>
+                        <!-- Traducción visual de TIPO1/TIPO2 -->
+                        <span class="badge badge-tipo-bono"
+                              th:text="${b.tipo.name() == 'TIPO1' ? 'Grupales' : 'Individuales'}">
+                            Tipo
+                        </span>
                     </div>
                     <span class="badge-usos" th:text="${b.usos.size() + ' / ' + b.max_usos}">0 / 10</span>
                 </div>
 
-                <h6 class="sesiones-label">Sesiones Programadas</h6>
+                <!-- Subcabecera con el botón de Solicitar para Bonos Individuales -->
+                <div class="d-flex justify-content-between align-items-center mt-3 mb-2 px-3">
+                    <h6 class="sesiones-label mb-0">Sesiones / Solicitudes</h6>
+                </div>
 
-                <div class="list-group list-group-flush">
+                <div class="list-group list-group-flush border-top">
 
+                    <!-- Lista de usos del bono -->
                     <div th:each="uso : ${b.usos}"
                          class="list-group-item session-item d-flex justify-content-between align-items-center"
                          th:classappend="${mapaBloqueo.get(b.id)} ? 'session-locked' : ''">
 
-                        <div>
+                        <div class="d-flex align-items-center">
+                            <!-- Badge de estado para solicitudes de Tipo 2 (Pendiente/Aceptada) -->
+                            <span th:if="${b.tipo.name() == 'TIPO2'}"
+                                  class="badge badge-estado"
+                                  th:classappend="${uso.estadoSolicitud != null && uso.estadoSolicitud.name() == 'ACEPTADA' ? 'bg-success' : 'bg-warning'}"
+                                  th:text="${uso.estadoSolicitud != null ? uso.estadoSolicitud : 'PENDIENTE'}">Estado</span>
+
                             <i class="far fa-calendar-check me-2"
                                th:classappend="${mapaBloqueo.get(b.id)} ? 'icon-muted' : 'icon-success'"></i>
-                            <span class="fw-medium" th:text="${#temporals.format(uso.fecha, 'dd/MM/yyyy')}">Fecha</span>
+
+                            <!-- Fecha: Si es null (solicitud sin asignar), mostramos texto alternativo -->
+                            <span class="fw-medium"
+                                  th:text="${uso.fecha != null ? #temporals.format(uso.fecha, 'dd/MM/yyyy') : 'Pendiente de asignar'}">
+                                Fecha
+                            </span>
                         </div>
 
-                        <!-- Bono bloqueado -->
-                        <div th:if="${mapaBloqueo.get(b.id)}" class="lock-icon" title="Bono consolidado (no editable)">
-                            <i class="fas fa-lock"></i>
-                        </div>
+                        <div class="btn-action-group d-flex align-items-center">
 
-                        <!-- Cancelar sesión -->
-                        <form th:unless="${mapaBloqueo.get(b.id)}"
-                              th:action="@{/uso/cancelar/{id}(id=${uso.id})}" method="post"
-                              onsubmit="return confirm('¿Estás seguro de que quieres cancelar esta sesión?');">
-                            <input type="hidden" name="usuarioId" th:value="${usuario.id}">
-                            <button type="submit" class="btn-cancelar-sesion">
-                                <i class="fas fa-times-circle fa-lg"></i>
-                            </button>
-                        </form>
+                            <!-- Candado si el bono está bloqueado -->
+                            <div th:if="${mapaBloqueo.get(b.id)}"
+                                 class="lock-icon"
+                                 title="Bono consolidado">
+
+                                <i class="fas fa-lock"></i>
+                            </div>
+
+                            <!-- BOTÓN PARA MOSTRAR CALENDARIO -->
+                            <div th:if="${b.tipo.name() == 'TIPO2'}"
+                                 class="position-relative d-flex align-items-center me-2">
+
+                                <!-- BOTÓN CALENDARIO -->
+                                <button type="button"
+                                        class="btn-cambio-clase"
+                                        th:onclick="'mostrarCalendario(' + ${uso.id} + ')'">
+
+                                    <i class="fas fa-calendar-alt"></i>
+                                </button>
+
+                                <!-- CALENDARIO OCULTO -->
+                                <div th:id="'contenedorCambio' + ${uso.id}"
+                                     style="display:none; position:absolute; right:40px; top:0; z-index:1000; background:white; padding:10px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.2);">
+
+                                    <form th:action="@{/uso/solicitar-cambio/{id}(id=${uso.id})}"
+                                          method="post"
+                                          class="d-flex align-items-center">
+
+                                        <input type="hidden"
+                                               name="usuarioId"
+                                               th:value="${usuario.id}">
+
+                                        <input type="date"
+                                               name="nuevaFecha"
+                                               class="form-control form-control-sm me-2"
+                                               required>
+
+                                        <button type="submit"
+                                                class="btn btn-success btn-sm">
+
+                                            OK
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- BOTÓN CANCELAR -->
+                            <form th:unless="${mapaBloqueo.get(b.id)}"
+                                  th:action="@{/uso/cancelar/{id}(id=${uso.id})}"
+                                  method="post"
+                                  onsubmit="return confirm('¿Estás seguro de que quieres cancelar esta sesión?');">
+
+                                <input type="hidden"
+                                       name="usuarioId"
+                                       th:value="${usuario.id}">
+
+                                <button type="submit"
+                                        class="btn-cancelar-sesion">
+
+                                    <i class="fas fa-times-circle fa-lg"></i>
+                                </button>
+
+                            </form>
+
+                        </div>
                     </div>
 
-                    <div th:if="${#lists.isEmpty(b.usos)}" class="sesiones-vacias">
-                        <small>No hay sesiones pendientes.</small>
+                    <!-- Mensaje si el bono no tiene ningún uso registrado -->
+                    <div th:if="${#lists.isEmpty(b.usos)}" class="empty-sessions-msg text-center">
+                        <small><i class="fas fa-info-circle me-1"></i> No hay sesiones programadas.</small>
                     </div>
                 </div>
             </div>
@@ -91,9 +195,9 @@
 
     <!-- SECCIÓN EVENTOS ESPECIALES -->
     <h3 class="section-title section-title-mt">
-        <i class="fas fa-star section-icon-gold"></i>Eventos Especiales
+        <i class="fas fa-star section-icon-gold"></i> Eventos Especiales
     </h3>
-    <p class="section-subtitle">Acceso gratuito incluido con cualquier bono activo.</p>
+    <p class="section-subtitle">Acceso gratuito incluido para usuarios con bonos activos.</p>
 
     <div class="row pb-5">
         <div th:each="ce : ${clasesEspeciales}" class="col-md-4 mb-4">
@@ -108,13 +212,37 @@
                 </p>
 
                 <form th:action="@{/clase/inscribir-especial/{claseId}(claseId=${ce.id})}" method="post">
+
                     <input type="hidden" name="usuarioId" th:value="${usuario.id}">
-                    <button th:if="${tieneBonos}" type="submit" class="btn-inscribir">
+
+                    <!-- YA INSCRITO -->
+                    <button th:if="${mapaInscritoEspecial.get(ce.id)}"
+                            type="button"
+                            class="btn-inscribir btn-success"
+                            disabled>
+
+                        <i class="fas fa-check-circle me-2"></i>
+                        Ya inscrito
+                    </button>
+
+                    <!-- PUEDE INSCRIBIRSE -->
+                    <button th:if="${!mapaInscritoEspecial.get(ce.id) && tieneBonos}"
+                            type="submit"
+                            class="btn-inscribir">
+
                         Inscribirse Gratis
                     </button>
-                    <button th:unless="${tieneBonos}" type="button" class="btn-inscribir btn-inscribir-disabled" disabled>
-                        <i class="fas fa-lock me-2"></i>Requiere Bono
+
+                    <!-- SIN BONO -->
+                    <button th:unless="${tieneBonos}"
+                            type="button"
+                            class="btn-inscribir btn-inscribir-disabled"
+                            disabled>
+
+                        <i class="fas fa-lock me-2"></i>
+                        Requiere Bono
                     </button>
+
                 </form>
             </div>
         </div>
@@ -129,15 +257,15 @@
             <div class="modal-header border-0 pb-0">
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-compra-body">
-                <i class="fas fa-ticket-alt fa-3x modal-icon-ticket"></i>
-                <h4 class="modal-title-compra">¿Qué bono prefieres?</h4>
+            <div class="modal-compra-body text-center">
+                <i class="fas fa-ticket-alt fa-3x modal-icon-ticket mb-3"></i>
+                <h4 class="modal-title-compra mb-4">¿Qué bono prefieres?</h4>
                 <div class="d-grid gap-3">
-                    <a th:href="@{/elegirEspecialidad/{id}/TIPO1(id=${usuario.id})}" class="btn-bono btn-bono-grupal">
-                        Bono Grupal (10 clases)
+                    <a th:href="@{/elegirEspecialidad/{id}/TIPO1(id=${usuario.id})}" class="btn-bono btn-bono-grupal py-3">
+                        <i class="fas fa-users me-2"></i> Bono Grupal (10 clases)
                     </a>
-                    <a th:href="@{/elegirEspecialidad/{id}/TIPO2(id=${usuario.id})}" class="btn-bono btn-bono-individual">
-                        Bono Individual (5 clases)
+                    <a th:href="@{/elegirEspecialidad/{id}/TIPO2(id=${usuario.id})}" class="btn-bono btn-bono-individual py-3">
+                        <i class="fas fa-user-check me-2"></i> Bono Individual (5 clases)
                     </a>
                 </div>
             </div>
@@ -146,5 +274,20 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+
+    function mostrarCalendario(id) {
+
+        const contenedor =
+            document.getElementById("contenedorCambio" + id);
+
+        if (contenedor.style.display === "none") {
+            contenedor.style.display = "block";
+        } else {
+            contenedor.style.display = "none";
+        }
+    }
+
+</script>
 </body>
 </html>

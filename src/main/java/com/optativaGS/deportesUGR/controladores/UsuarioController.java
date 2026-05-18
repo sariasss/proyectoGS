@@ -178,6 +178,7 @@ public class UsuarioController {
     //Muestra la pantalla del entrenador
     @GetMapping("/indexUsuario/{id}")
     public String indexUsuario(@PathVariable Long id, Model model) {
+
         UsuarioDTO usuarioDTO = usuarioService.findById(id);
         Usuario usuarioReal = usuarioService.findEntityById(id);
 
@@ -185,6 +186,7 @@ public class UsuarioController {
         java.util.Map<Long, Boolean> mapaBloqueo = new java.util.HashMap<>();
 
         if (usuarioReal != null && usuarioReal.getBonos() != null) {
+
             misBonos = usuarioReal.getBonos();
 
             misBonos.forEach(bono -> {
@@ -194,9 +196,12 @@ public class UsuarioController {
             });
 
             for (Bono b : misBonos) {
+
                 boolean tieneBonoPosterior = misBonos.stream()
-                        .anyMatch(otro -> otro.getEspecialidad().equals(b.getEspecialidad())
-                                && otro.getId() > b.getId());
+                        .anyMatch(otro ->
+                                otro.getEspecialidad().equals(b.getEspecialidad())
+                                        && otro.getTipo().equals(b.getTipo())
+                                        && otro.getId() > b.getId());
 
                 mapaBloqueo.put(b.getId(), tieneBonoPosterior);
             }
@@ -213,15 +218,29 @@ public class UsuarioController {
                 .filter(c -> misEspecialidades.contains(c.getEspecialidad()))
                 .toList();
 
-        List<Clase> clasesEspeciales = todasLasClases.stream()
+        List<ClaseTipo3> clasesEspeciales = todasLasClases.stream()
                 .filter(c -> c instanceof ClaseTipo3)
+                .map(c -> (ClaseTipo3) c)
                 .toList();
+
+        // MAPA PARA SABER SI EL USUARIO YA ESTÁ INSCRITO
+        java.util.Map<Long, Boolean> mapaInscritoEspecial = new java.util.HashMap<>();
+
+        for (ClaseTipo3 clase : clasesEspeciales) {
+
+            boolean inscrito = clase.getInscripciones() != null &&
+                    clase.getInscripciones().stream()
+                            .anyMatch(i -> i.getUsuario().getId().equals(id));
+
+            mapaInscritoEspecial.put(clase.getId(), inscrito);
+        }
 
         model.addAttribute("usuario", usuarioDTO);
         model.addAttribute("misBonos", misBonos);
         model.addAttribute("mapaBloqueo", mapaBloqueo);
         model.addAttribute("clases", clasesBonos);
         model.addAttribute("clasesEspeciales", clasesEspeciales);
+        model.addAttribute("mapaInscritoEspecial", mapaInscritoEspecial);
         model.addAttribute("tieneBonos", !misBonos.isEmpty());
 
         return "indexUsuario";
