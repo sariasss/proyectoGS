@@ -73,4 +73,31 @@ public class ClaseController {
         claseService.save(claseTipo3);
         return "redirect:/admin";
     }
+
+    @GetMapping("/clasesEntrenador/{id}/tipo1")
+    public String listarTipo1(@PathVariable Long id, Model model) {
+        model.addAttribute("entrenador", usuarioService.findById(id));
+        model.addAttribute("clases", claseService.findTipo1ByEntrenadorId(id));
+        model.addAttribute("mostrandoHistorial", false);
+        model.addAttribute("mostrandoTipo", "tipo1");
+        return "indexEntrenador";
+    }
+
+    @GetMapping("/clasesEntrenador/{id}/tipo2")
+    public String listarTipo2(@PathVariable Long id, Model model) {
+        model.addAttribute("entrenador", usuarioService.findById(id));
+        model.addAttribute("clases", claseService.findTipo2ByEntrenadorId(id));
+        model.addAttribute("mostrandoHistorial", false);
+        model.addAttribute("mostrandoTipo", "tipo2");
+        return "indexEntrenador";
+    }
+
+    @GetMapping("/clasesEntrenador/{id}/tipo3")
+    public String listarTipo3(@PathVariable Long id, Model model) {
+        model.addAttribute("entrenador", usuarioService.findById(id));
+        model.addAttribute("clases", claseService.findTipo3ByEntrenadorId(id));
+        model.addAttribute("mostrandoHistorial", false);
+        model.addAttribute("mostrandoTipo", "tipo3");
+        return "indexEntrenador";
+    }
 }

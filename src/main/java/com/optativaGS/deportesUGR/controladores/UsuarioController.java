@@ -30,20 +30,22 @@ public class UsuarioController {
 
     //Recoge los datos del login y devuelve una página según quién ha iniciado sesión
     @PostMapping("/login")
-    public String procesarLogin(@RequestParam String email, @RequestParam String password, Model model){
+    public String procesarLogin(@RequestParam String email,
+                                @RequestParam String password,
+                                Model model){
+
         UsuarioDTO usuario = usuarioService.login(email, password);
 
-        if (usuario != null) {
-            model.addAttribute("usuario", usuario);
-
-            return switch (usuario.rol()) {
-                case USUARIO -> "redirect:/indexUsuario/" + usuario.id();
-                case ADMIN -> "redirect:/admin";
-                case ENTRENADOR -> "redirect:/clasesEntrenador/" + usuario.id();
-            };
+        if (usuario == null) {
+            model.addAttribute("error", "Email o contraseña incorrectos");
+            return "login";
         }
-        model.addAttribute("error", "Email o contraseña incorrectos");
-        return "login";
+
+        return switch (usuario.rol()) {
+            case USUARIO -> "redirect:/indexUsuario/" + usuario.id();
+            case ADMIN -> "redirect:/admin";
+            case ENTRENADOR -> "redirect:/clasesEntrenador/" + usuario.id();
+        };
     }
 
     //Devuelve una tabla con todos los usuarios para el admin

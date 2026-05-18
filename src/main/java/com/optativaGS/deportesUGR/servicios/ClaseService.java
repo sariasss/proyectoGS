@@ -182,4 +182,16 @@ public class ClaseService {
                 .filter(u -> u.getEstadoSolicitud() == EstadoSolicitud.PENDIENTE)
                 .toList();
     }
+
+    public List<ClaseTipo1> findTipo1ByEntrenadorId(Long id) {
+        return claseRepository.findTipo1ByEntrenadorId(id);
+    }
+
+    public List<ClaseTipo2> findTipo2ByEntrenadorId(Long id) {
+        return claseRepository.findTipo2ByEntrenadorId(id);
+    }
+
+    public List<ClaseTipo3> findTipo3ByEntrenadorId(Long id) {
+        return claseRepository.findTipo3ByEntrenadorId(id);
+    }
 }

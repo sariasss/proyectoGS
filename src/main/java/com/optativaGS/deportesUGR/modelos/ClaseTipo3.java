@@ -8,8 +8,6 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @ToString
 public class ClaseTipo3 extends Clase{
     private int cupoMax;
@@ -17,4 +15,15 @@ public class ClaseTipo3 extends Clase{
     @OneToMany(mappedBy = "clase")
     private List<ClaseTipo3Usuario> inscripciones;
 
+    public ClaseTipo3() {
+        super();
+        this.setDuracionMinutos(60);
+    }
+
+    public ClaseTipo3(int cupoMax, List<ClaseTipo3Usuario> inscripciones) {
+        super();
+        this.setDuracionMinutos(60);
+        this.cupoMax = cupoMax;
+        this.inscripciones = inscripciones;
+    }
 }

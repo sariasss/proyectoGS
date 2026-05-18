@@ -21,7 +21,7 @@
     <h3>Mis clases asignadas</h3>
 
     <!-- BOTONES DE FILTRO -->
-    <div class="filters-container">
+    <div class="filters-container" th:if="${!(mostrandoHistorial ?: false) && !#lists.isEmpty(clases)}">
         <a th:href="@{/clasesEntrenador/{id}(id=${entrenador.id}, historial=false)}"
            class="btn-filter" th:classappend="${!mostrandoHistorial} ? 'active' : ''">
             Próximas Clases
@@ -33,10 +33,36 @@
     </div>
 
     <!-- BOTONES DE FILTRO POR TIPO (Solo se muestran si NO es historial) -->
+    <!-- BOTONES DE FILTRO POR TIPO (Solo se muestran si NO es historial) -->
     <div class="filters-container" th:if="${!mostrandoHistorial && !#lists.isEmpty(clases)}">
-        <button class="btn-filter active" onclick="filterClases('all', this)">Todas</button>
-        <button class="btn-filter" onclick="filterClases('tipo1-2', this)">Bonos (T1 y T2)</button>
-        <button class="btn-filter" onclick="filterClases('tipo3', this)">Especiales (T3)</button>
+
+        <!-- Botón Todas: Redirige a la vista general -->
+        <a th:href="@{/clasesEntrenador/{id}(id=${entrenador.id}, historial=false)}"
+           class="btn-filter"
+           th:classappend="${mostrandoTipo == null || mostrandoTipo == 'all'} ? 'active' : ''">
+            Todas
+        </a>
+
+        <!-- Botón Tipo 1: Separado -->
+        <a th:href="@{/clasesEntrenador/{id}/tipo1(id=${entrenador.id})}"
+           class="btn-filter"
+           th:classappend="${mostrandoTipo == 'tipo1'} ? 'active' : ''">
+            Tipo 1 (Grupales)
+        </a>
+
+        <!-- Botón Tipo 2: Separado -->
+        <a th:href="@{/clasesEntrenador/{id}/tipo2(id=${entrenador.id})}"
+           class="btn-filter"
+           th:classappend="${mostrandoTipo == 'tipo2'} ? 'active' : ''">
+            Tipo 2 (Bonos)
+        </a>
+
+        <!-- Botón Tipo 3: Separado por URL en vez de JS -->
+        <a th:href="@{/clasesEntrenador/{id}/tipo3(id=${entrenador.id})}"
+           class="btn-filter"
+           th:classappend="${mostrandoTipo == 'tipo3'} ? 'active' : ''">
+            Tipo 3 (Especiales)
+        </a>
     </div>
 
     <div class="table-container" th:if="${!#lists.isEmpty(clases)}">
@@ -63,7 +89,7 @@
                     <span class="time-box">
                         <span th:text="${c.fecha != null ? #temporals.format(c.fecha, 'HH:mm') : '--:--'}">17:00</span>
                         &ndash;
-                        <span th:text="${c.fecha != null ? #temporals.format(c.fecha.plusMinutes(c.duracionMinutos ?: 0), 'HH:mm') : '--:--'}">18:00</span>
+                        <span th:text="${c.fechaFin != null ? #temporals.format(c.fechaFin, 'HH:mm') : '--:--'}">18:00</span>
                     </span>
                 </td>
 
@@ -99,27 +125,5 @@
         <p>No tienes clases asignadas actualmente.</p>
     </div>
 </div>
-
-<script>
-    function filterClases(tipo, btn) {
-        document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-
-        const rowsT12 = document.querySelectorAll('.row-tipo1-2');
-        const rowsT3 = document.querySelectorAll('.row-tipo3');
-
-        if (tipo === 'all') {
-            rowsT12.forEach(r => r.classList.remove('hidden-row'));
-            rowsT3.forEach(r => r.classList.remove('hidden-row'));
-        } else if (tipo === 'tipo1-2') {
-            rowsT12.forEach(r => r.classList.remove('hidden-row'));
-            rowsT3.forEach(r => r.classList.add('hidden-row'));
-        } else if (tipo === 'tipo3') {
-            rowsT12.forEach(r => r.classList.add('hidden-row'));
-            rowsT3.forEach(r => r.classList.remove('hidden-row'));
-        }
-    }
-</script>
-
 </body>
 </html>

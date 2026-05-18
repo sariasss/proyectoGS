@@ -30,4 +30,12 @@ public abstract class Clase {
 
     private Integer duracionMinutos;
 
+    public LocalDateTime getFechaFin() {
+        if (this.fecha == null) {
+            return null;
+        }
+        long minutos = (this.duracionMinutos != null) ? this.duracionMinutos.longValue() : 0L;
+        return this.fecha.plusMinutes(minutos);
+    }
+
 }

@@ -1033,3 +1033,7 @@ body.login-page {
     background: var(--plum-deep);
     color: var(--white);
 }
+
+.error {
+    color: #871313;
+}
